@@ -1,0 +1,108 @@
+/* ...puedes copiar el CSS de admin-dashboard.component.css para mantener coherencia... */
+:root {
+  --primary-color: #3a7bd5;
+  --secondary-color: #ff0050;
+  --accent-color: #00e6ff;
+  --background-dark: #1a2233;
+  --text-light: #b0eaff;
+  --font-main: 'Poppins', 'Segoe UI', Arial, sans-serif;
+}
+
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: rgba(30, 40, 60, 0.96);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  color: var(--text-light);
+  font-family: var(--font-main);
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--background-dark);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 2em;
+  color: var(--text-light);
+}
+.styled-table thead tr {
+  background-color: var(--primary-color);
+  color: #fff;
+  text-align: left;
+}
+.styled-table th,
+.styled-table td {
+  padding: 14px 16px;
+  border: 1px solid #2e3644;
+}
+.styled-table tbody tr:nth-child(even) {
+  background-color: #222c3c;
+}
+.styled-table tbody tr:hover {
+  background: rgba(58,123,213,0.07);
+}
+
+.btn-danger {
+  background-color: var(--secondary-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-danger:hover {
+  background-color: #d90045;
+}
+
+.message,
+.message-success {
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid var(--accent-color);
+  background: rgba(0, 230, 255, 0.13);
+  color: var(--accent-color);
+  box-shadow: 0 2px 12px rgba(0,230,255,0.09);
+}
+.message-success {
+  border-color: var(--accent-color);
+  background: rgba(0, 230, 255, 0.13);
+  color: var(--accent-color);
+}
+
+.modal-confirm {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(30,40,60,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: #fff;
+  color: #222;
+  padding: 2em 2.5em;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(31,38,135,0.18);
+  text-align: center;
+  min-width: 320px;
+}
+.modal-content h3 {
+  margin-bottom: 1em;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+  margin-left: 1em;
+}

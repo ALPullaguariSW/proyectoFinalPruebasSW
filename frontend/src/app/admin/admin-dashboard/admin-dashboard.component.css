@@ -1,0 +1,188 @@
+/* Variables globales para colores */
+:root {
+  --primary-color: #223a5e;         /* Azul oscuro */
+  --secondary-color: #e94560;       /* Rojo para acentos y acciones */
+  --accent-color: #3a7bd5;          /* Azul claro/acento */
+  --background-dark: #16213e;       /* Fondo principal */
+  --background-light: #223a5e;      /* Fondo de tarjetas y formularios */
+  --text-light: #f4f6fb !important;            /* Texto claro */
+  --text-dark: #fff1f1 !important;                /* Texto oscuro */
+  --font-main: 'Poppins', 'Segoe UI', Arial, sans-serif;
+}
+
+/* Estilos del cuerpo */
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(120deg, var(--background-dark) 0%, var(--primary-color) 100%);
+  color: var(--text-light);
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background: var(--background-light);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(34,58,94,0.18);
+  color: var(--text-light);
+}
+
+/* Encabezado del dashboard */
+.dashboard-header {
+  background: var(--primary-color);
+  color: var(--accent-color);
+  padding: 2rem 0;
+  text-align: center;
+  border-bottom: 2px solid var(--accent-color);
+  box-shadow: 0 4px 12px rgba(34,58,94,0.10);
+}
+.dashboard-header .container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Mensaje de bienvenida */
+.welcome-message {
+  font-size: 1.2rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+  color: var(--accent-color);
+  text-shadow: 0 2px 8px #3a7bd533;
+}
+
+/* Dashboard cards */
+.dashboard-cards {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 36px;
+}
+.dashboard-card {
+  background: var(--background-dark);
+  flex: 1;
+  text-align: center;
+  padding: 1.6rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(34,58,94,0.15);
+  color: var(--text-light);
+  font-weight: 500;
+  transition: transform 0.18s, box-shadow 0.18s;
+  border: 2px solid var(--accent-color);
+}
+.dashboard-card h2, .dashboard-card p {
+  color: var(--text-light);
+}
+.dashboard-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--secondary-color);
+  box-shadow: 0 10px 36px rgba(34,58,94,0.22);
+}
+
+/* Tabla de datos */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--background-dark);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 2em;
+  color: var(--text-light);
+}
+.styled-table thead tr {
+  background-color: var(--accent-color);
+  color: #fff;
+  text-align: left;
+}
+.styled-table th,
+.styled-table td {
+  padding: 14px 16px;
+  border: 1px solid #223a5e33;
+}
+.styled-table tbody tr:nth-child(even) {
+  background-color: #223a5e;
+}
+.styled-table tbody tr:hover {
+  background: rgba(58,123,213,0.13);
+}
+
+/* Enlaces de acciones */
+.admin-links {
+  margin-top: 2em;
+  display: flex;
+  gap: 18px;
+}
+.admin-links a {
+  padding: 12px 22px;
+  border-radius: 7px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(34,58,94,0.07);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.btn-primary {
+  background-color: var(--accent-color);
+}
+.btn-secondary {
+  background-color: var(--primary-color);
+}
+.btn-info {
+  background-color: var(--secondary-color);
+}
+.admin-links a:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-info:hover {
+  background: var(--secondary-color);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(233,69,96,0.13);
+}
+
+/* Mensajes */
+.message,
+.message-success,
+.message-error,
+.message-info {
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid var(--accent-color);
+  background: rgba(58,123,213,0.13);
+  color: var(--accent-color);
+  box-shadow: 0 2px 12px rgba(34,58,94,0.09);
+}
+.message-error {
+  border-color: var(--secondary-color);
+  background: rgba(233,69,96,0.16);
+  color: var(--secondary-color);
+}
+.message-success {
+  border-color: var(--accent-color);
+  background: rgba(58,123,213,0.13);
+  color: var(--accent-color);
+}
+.message-info {
+  border-color: var(--primary-color);
+  background: rgba(34,58,94,0.10);
+  color: var(--primary-color);
+}
+
+/* Estilos responsivos */
+@media (max-width: 900px) {
+  .container {
+    max-width: 98vw;
+    padding: 1rem;
+  }
+  .dashboard-menu {
+    flex-direction: column;
+    gap: 1.2rem;
+    align-items: center;
+  }
+  .dashboard-card {
+    width: 90vw;
+    max-width: 340px;
+  }
+}

@@ -1,0 +1,70 @@
+:root {
+  --primary-color: #3a7bd5;
+  --secondary-color: #ff0050;
+  --accent-color: #00e6ff;
+  --background-dark: #1a2233;
+  --background-light: #f8f9fa;
+  --text-light: #b0eaff;
+  --text-dark: #ffffff !important;
+  --font-main: 'Poppins', 'Segoe UI', Arial, sans-serif;
+}
+
+.admin-header {
+  background: var(--primary-color);
+  color: #fff;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 12px rgba(0,230,255,0.07);
+  border-bottom: 2px solid var(--accent-color);
+  font-family: var(--font-main);
+}
+.admin-header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.admin-logo-link {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-color);
+  text-decoration: none;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.admin-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+.admin-nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.4em 1em;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  font-size: 1.08rem;
+  letter-spacing: 0.5px;
+}
+.admin-nav-link.active,
+.admin-nav-link:hover {
+  background: var(--accent-color);
+  color: #fff;
+  text-decoration: underline;
+  box-shadow: 0 2px 8px rgba(0,230,255,0.09);
+}
+.logout-link {
+  color: var(--secondary-color);
+  font-weight: 600;
+  background: rgba(255,0,80,0.09);
+}
+.logout-link:hover {
+  background: var(--secondary-color);
+  color: #fff;
+}

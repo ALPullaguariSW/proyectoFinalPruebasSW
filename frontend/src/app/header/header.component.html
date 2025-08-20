@@ -1,0 +1,27 @@
+<header class="site-header">
+  <div class="container header-container">
+    <a [routerLink]="usuario ? '/dashboard' : '/login'" class="logo">
+      <img src="assets/img/logoHotel.avif" alt="HotelSys Logo" height="40">
+      <span>HotelSys</span>
+    </a>
+    <nav class="main-nav">
+      <ul>
+        <ng-container *ngIf="usuario; else guestLinks">
+          <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+          <li><a routerLink="/booking" routerLinkActive="active">Reservar</a></li>
+          <li><a routerLink="/mis-reservas" routerLinkActive="active">Mis Reservas</a></li>
+          <a (click)="logout()" style="cursor:pointer">Cerrar Sesión ({{ usuario.nombre }})</a>
+        </ng-container>
+        <ng-template #guestLinks>
+          <li><a routerLink="/login" routerLinkActive="active">Iniciar Sesión</a></li>
+          <li><a routerLink="/register" routerLinkActive="active">Registrarse</a></li>
+        </ng-template>
+      </ul>
+    </nav>
+    <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>

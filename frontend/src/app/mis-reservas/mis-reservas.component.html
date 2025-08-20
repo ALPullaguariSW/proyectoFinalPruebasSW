@@ -1,0 +1,40 @@
+<app-header></app-header>
+<div class="container">
+  <h2>Mis Reservas</h2>
+
+  <p *ngIf="mensaje" class="message" [ngClass]="'message-' + claseMensaje">{{ mensaje }}</p>
+
+  <div class="reservas-list" *ngIf="reservas.length > 0; else sinReservas">
+    <div class="reserva-card" *ngFor="let reserva of reservas">
+      <div class="reserva-image">
+        <img [src]="reserva.habitacion_imagen || 'assets/default_room.jpg'" alt="Habitación {{ reserva.habitacion_numero }}">
+      </div>
+      <div class="reserva-details">
+        <h3>Habitación {{ reserva.habitacion_numero }} ({{ reserva.habitacion_tipo }})</h3>
+        <p><strong>Entrada:</strong> {{ formatearFecha(reserva.fecha_inicio) }}</p>
+        <p><strong>Salida:</strong> {{ formatearFecha(reserva.fecha_fin) }}</p>
+        <p><strong>Precio por noche:</strong> ${{ reserva.habitacion_precio }}</p>
+        <p><strong>Reservado el:</strong> {{ formatearFecha(reserva.creado_en) }}</p>
+      </div>
+      <div class="reserva-actions">
+      
+
+  <button *ngIf="fechaEsFutura(reserva.fecha_inicio)"
+          class="btn-cancelar"
+          (click)="cancelarReserva(reserva.id)">
+    Cancelar Reserva
+  </button>
+  <p *ngIf="!fechaEsFutura(reserva.fecha_inicio)">
+    <em>Reserva pasada o en curso.</em>
+  </p>
+</div>
+    </div>
+  </div>
+
+  <ng-template #sinReservas>
+    <p class="message message-info">Aún no tienes reservas realizadas. <a routerLink="/booking">¡Haz tu primera reserva!</a></p>
+  </ng-template>
+
+  
+</div>
+<app-footer></app-footer>

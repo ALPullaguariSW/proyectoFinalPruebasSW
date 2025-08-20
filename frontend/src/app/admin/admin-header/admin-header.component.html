@@ -1,0 +1,16 @@
+<header class="admin-header">
+  <div class="container admin-header-container">
+    <div class="admin-logo">
+      <a routerLink="/admin/dashboard" class="admin-logo-link">
+        HotelSys Admin
+      </a>
+    </div>
+    <nav class="admin-nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="admin-nav-link">Dashboard</a>
+      <a routerLink="/admin/disponibilidad" routerLinkActive="active" class="admin-nav-link">Disponibilidad</a>
+      <a routerLink="/admin/gestionar-habitaciones" routerLinkActive="active" class="admin-nav-link">Gestionar Habitaciones</a>
+      <a routerLink="/admin/reservas" routerLinkActive="active" class="admin-nav-link">Reservas</a>
+      <button class="admin-nav-link logout-link" (click)="logout()">Cerrar sesión</button>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,29 @@
+name: backend-reservas
+service:
+  name: backend-reservas
+  type: web
+  env:
+    - name: PORT
+      value: "3000"
+    - name: NODE_ENV
+      value: "production"
+  ports:
+    - port: 3000
+      protocol: http
+  routes:
+    - path: /
+      protocol: http
+  envs:
+    - name: DB_HOST
+      value: "your-mysql-host"
+    - name: DB_USER
+      value: "your-mysql-user"
+    - name: DB_PASSWORD
+      value: "your-mysql-password"
+    - name: DB_NAME
+      value: "your-mysql-database"
+    - name: JWT_SECRET
+      value: "your-jwt-secret-key"
+  docker:
+    image: your-registry/backend-reservas:latest
+    registry: your-registry

@@ -1,0 +1,4 @@
+python-docx==0.8.11
+markdown==3.4.4
+weasyprint==60.1
+docx2python==0.5.6

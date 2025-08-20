@@ -1,0 +1,80 @@
+<app-admin-header></app-admin-header>
+<div class="container">
+  <h1>Gestionar Habitaciones</h1>
+  <p *ngIf="mensaje" class="message {{claseMensaje}}">{{mensaje}}</p>
+
+  <form (ngSubmit)="guardarHabitacion()" #formHab="ngForm" class="form-habitacion" style="margin-bottom:2em;">
+    <input type="hidden" name="id" [(ngModel)]="habitacionForm.id">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Número:</label>
+        <input type="text" name="numero" [(ngModel)]="habitacionForm.numero" required placeholder="Ej: 101">
+      </div>
+      <div class="form-group">
+        <label>Tipo:</label>
+        <select name="tipo" [(ngModel)]="habitacionForm.tipo" required>
+          <option value="">Selecciona tipo</option>
+          <option value="Simple">Simple</option>
+          <option value="Doble">Doble</option>
+          <option value="Suite">Suite</option>
+          <option value="Familiar">Familiar</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Precio (€):</label>
+        <input type="number" step="0.01" name="precio" [(ngModel)]="habitacionForm.precio" required placeholder="Ej: 45.00">
+      </div>
+      <div class="form-group">
+        <label>Imagen (URL):</label>
+        <input type="text" name="imagen" [(ngModel)]="habitacionForm.imagen" placeholder="URL de la imagen">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>Descripción:</label>
+        <textarea name="descripcion" rows="4" [(ngModel)]="habitacionForm.descripcion" placeholder="Describe la habitación..."></textarea>
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>Servicios:</label>
+        <textarea name="servicios" rows="4" [(ngModel)]="habitacionForm.servicios" placeholder="Ej: Aire acondicionado, WiFi, TV..."></textarea>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:1rem;">
+      <button type="submit" class="btn btn-primary">{{ modoEdicion ? "Actualizar" : "Crear" }}</button>
+      <button type="button" class="btn btn-secondary" *ngIf="modoEdicion" (click)="limpiarFormulario()">Cancelar</button>
+    </div>
+  </form>
+
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Número</th>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th>Servicios</th>
+        <th>Imagen</th>
+        <th>Precio (€)</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let hab of habitaciones">
+        <td>{{hab.numero}}</td>
+        <td>{{hab.tipo}}</td>
+        <td>{{hab.descripcion}}</td>
+        <td>{{hab.servicios}}</td>
+        <td>
+          <img *ngIf="hab.imagen" [src]="hab.imagen" alt="Imagen habitación" style="max-width:70px; border-radius:6px;">
+        </td>
+        <td>{{hab.precio | number:'1.2-2'}}</td>
+        <td>
+          <button class="btn btn-sm btn-warning" (click)="editarHabitacion(hab)">Editar</button>
+          <button class="btn btn-sm btn-danger" (click)="eliminarHabitacion(hab.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<app-footer></app-footer>

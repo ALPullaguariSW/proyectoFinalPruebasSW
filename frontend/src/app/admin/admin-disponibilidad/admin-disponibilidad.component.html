@@ -1,0 +1,32 @@
+<app-admin-header></app-admin-header>
+  <a routerLink="/admin/dashboard" class="btn btn-secondary">Volver al Dashboard</a>
+<div class="container">
+  <h1>Disponibilidad de Habitaciones</h1>
+  <form (ngSubmit)="consultarDisponibilidad()" class="form-inline" style="margin-bottom:2em;">
+    <label for="fecha_inicio">Desde:</label>
+    <input type="date" id="fecha_inicio" [(ngModel)]="fecha_inicio" name="fecha_inicio" required>
+    <label for="fecha_fin">Hasta:</label>
+    <input type="date" id="fecha_fin" [(ngModel)]="fecha_fin" name="fecha_fin" required>
+    <button type="submit" class="btn btn-primary">Consultar</button>
+  </form>
+
+  <p *ngIf="mensaje" class="message {{claseMensaje}}">{{mensaje}}</p>
+
+  <table *ngIf="habitaciones.length > 0" class="styled-table">
+    <thead>
+      <tr>
+        <th>Número</th>
+        <th>Tipo</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let hab of habitaciones">
+        <td>{{hab.numero}}</td>
+        <td>{{hab.tipo}}</td>
+        <td>{{hab.descripcion}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<app-footer></app-footer>

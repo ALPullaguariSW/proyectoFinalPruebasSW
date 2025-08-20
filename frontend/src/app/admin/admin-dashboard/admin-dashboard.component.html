@@ -1,0 +1,52 @@
+<app-admin-header></app-admin-header>
+<div class="container">
+  <h1>Panel de Administración</h1>
+
+  <div class="dashboard-cards">
+    <div class="dashboard-card">
+      <h2>{{ totalUsuarios }}</h2>
+      <p>Usuarios registrados</p>
+    </div>
+    <div class="dashboard-card">
+      <h2>{{ totalReservas }}</h2>
+      <p>Reservas totales</p>
+    </div>
+    <div class="dashboard-card">
+      <h2>{{ totalHabitaciones }}</h2>
+      <p>Habitaciones</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 2em;">Próximas reservas</h3>
+  <table class="styled-table" *ngIf="proximasReservas.length > 0; else sinReservas">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Habitación</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let reserva of proximasReservas">
+        <td>{{ reserva.id }}</td>
+        <td>{{ reserva.usuario }}</td>
+        <td>{{ reserva.habitacion }}</td>
+        <td>{{ formatearFecha(reserva.fecha_inicio) }}</td>
+        <td>{{ formatearFecha(reserva.fecha_fin) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #sinReservas>
+    <p>No hay próximas reservas.</p>
+  </ng-template>
+
+  <div class="admin-links" style="margin-top: 2em;">
+    <a routerLink="/admin/reservas" class="btn btn-primary">Gestionar Reservas</a>
+    <a routerLink="/admin/gestionar-habitaciones" class="btn btn-secondary">Gestionar Habitaciones</a>
+    <a routerLink="/admin/disponibilidad" class="btn btn-info">Ver Disponibilidad</a>
+  </div>
+</div>
+<app-footer></app-footer>

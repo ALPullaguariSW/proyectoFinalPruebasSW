@@ -1,0 +1,133 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  --primary-color: #23272b;         /* Gris oscuro */
+  --secondary-color: #bfa181;       /* Dorado suave */
+  --accent-color: #4b5d67;          /* Azul grisáceo */
+  --background-dark: #181a1b;       /* Fondo principal */
+  --background-light: #2c3136;      /* Fondo de tarjetas y formularios */
+  --text-light: #eaeaea;            /* Texto claro */
+  --text-dark: #222;                /* Texto oscuro */
+  --font-main: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  --border-radius: 12px;
+  --shadow: 0 4px 16px rgba(75,93,103,0.10);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background: linear-gradient(120deg, var(--background-dark) 0%, var(--background-light) 100%);
+  color: var(--text-light);
+}
+
+a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-main);
+  color: var(--secondary-color);
+  margin-top: 0;
+}
+
+input, select, textarea, button {
+  font-family: var(--font-main);
+}
+
+.btn, .btn-primary, .btn-secondary, .btn-info, .btn-danger, .btn-warning {
+  display: inline-block;
+  padding: 0.7em 1.3em;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+.btn-primary { background: var(--secondary-color); color: var(--background-dark); }
+.btn-secondary { background: var(--accent-color); color: #fff; }
+.btn-info { background: var(--background-light); color: var(--secondary-color); }
+.btn-danger { background: #a94442; color: #fff; }
+.btn-warning { background: #ffc107; color: #222; }
+.btn:hover, .btn-primary:hover, .btn-secondary:hover, .btn-info:hover, .btn-danger:hover, .btn-warning:hover {
+  background: var(--accent-color);
+  color: var(--secondary-color);
+  box-shadow: 0 4px 16px rgba(75,93,103,0.18);
+}
+
+.message, .message-success, .message-error, .message-info {
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.08rem;
+  border: 2px solid var(--accent-color);
+  background: rgba(75,93,103,0.13);
+  color: var(--accent-color);
+  box-shadow: 0 2px 12px rgba(75,93,103,0.09);
+}
+.message-error {
+  border-color: #a94442;
+  background: rgba(169,68,66,0.16);
+  color: #a94442;
+}
+.message-success {
+  border-color: var(--secondary-color);
+  background: rgba(191,161,129,0.13);
+  color: var(--secondary-color);
+}
+.message-info {
+  border-color: var(--accent-color);
+  background: rgba(75,93,103,0.10);
+  color: var(--accent-color);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--background-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 8px;
+}
+
+/* Responsive base */
+@media (max-width: 900px) {
+  .container {
+    max-width: 98vw;
+    padding: 1rem;
+  }
+}
+
+/* Layout principal para sticky footer */
+body, .site-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-wrapper {
+  height: 100vh; /* Asegura que ocupe toda la pantalla */
+}
+
+main, .site-main {
+  flex: 1 0 auto;
+}
+
+.site-footer-bottom {
+  flex-shrink: 0;
+  width: 100%;
+}

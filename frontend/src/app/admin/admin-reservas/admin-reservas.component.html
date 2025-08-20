@@ -1,0 +1,49 @@
+<app-admin-header></app-admin-header>
+<div class="container">
+  <h1>Gestión de Reservas</h1>
+  <p *ngIf="mensaje" class="message {{claseMensaje}}">{{mensaje}}</p>
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Usuario</th>
+        <th>Correo</th>
+        <th>Habitación</th>
+        <th>Tipo</th>
+        <th>Entrada</th>
+        <th>Salida</th>
+        <th>Reservado el</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let reserva of reservas">
+        <td>{{reserva.id}}</td>
+        <td>{{reserva.usuario}}</td>
+        <td>{{reserva.correo}}</td>
+        <td>{{reserva.habitacion_numero}}</td>
+        <td>{{reserva.habitacion_tipo}}</td>
+        <td>{{reserva.fecha_inicio}}</td>
+        <td>{{reserva.fecha_fin}}</td>
+        <td>{{reserva.creado_en}}</td>
+        <td>
+          <button class="btn btn-danger btn-sm"
+            (click)="confirmarCancelacion(reserva.id)">
+            Cancelar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Modal de confirmación -->
+  <div class="modal-confirm" *ngIf="mostrarConfirmacion">
+    <div class="modal-content">
+      <h3>¿Estás seguro de que quieres cancelar esta reserva?</h3>
+      <div style="margin-top:1.5em;">
+        <button class="btn btn-danger" (click)="aceptarConfirmacion()">OK</button>
+        <button class="btn btn-secondary" (click)="cancelarConfirmacion()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<app-footer></app-footer>

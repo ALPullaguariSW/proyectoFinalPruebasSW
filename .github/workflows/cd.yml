@@ -1,0 +1,56 @@
+name: CD - Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI - Plataforma de Reservas"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-build
+        path: ./frontend/dist
+
+    - name: Deploy to GitHub Pages
+      id: deploy
+      uses: peaceiris/actions-gh-pages@v1.7.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./frontend/dist
+        destination_dir: /
+        force_orphan: true
+
+    - name: Get deployment URL
+      id: url
+      run: |
+        echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> $GITHUB_OUTPUT
+
+    - name: Deploy Backend to Render
+      env:
+        RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+        RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      run: |
+        curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+          -H "Authorization: Bearer $RENDER_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"clearCache": "do_not_clear"}'
+
+    - name: Update deployment status
+      run: |
+        echo "Frontend deployed to: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+        echo "Backend deployment triggered on Render"

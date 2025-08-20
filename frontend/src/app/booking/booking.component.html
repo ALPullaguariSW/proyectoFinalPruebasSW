@@ -1,0 +1,70 @@
+<app-header></app-header>
+<div class="booking-container">
+  <h2>Busca Disponibilidad</h2>
+
+  <div *ngIf="mensaje" [class]="'message message-' + claseMensaje" [innerHTML]="mensaje"></div>
+
+  <form (ngSubmit)="consultarDisponibilidad()" class="reserva-form">
+    <!-- Aplica la grilla para los filtros -->
+    <div class="filters-grid">
+      <label>
+        Fecha de Entrada:
+        <input type="date" [(ngModel)]="fecha_inicio" name="fecha_inicio" required />
+      </label>
+      <label>
+        Fecha de Salida:
+        <input type="date" [(ngModel)]="fecha_fin" name="fecha_fin" required />
+      </label>
+      <label>
+        Tipo de Habitación:
+        <select [(ngModel)]="tipo_seleccionado" name="tipo_seleccionado">
+          <option value="">Todos los tipos</option>
+          <option *ngFor="let tipo of tiposHabitacion" [value]="tipo">{{ tipo }}</option>
+        </select>
+      </label>
+      <button type="submit">Consultar</button>
+    </div>
+  </form>
+
+  <section class="catalogo-section" *ngIf="habitacionesDisponibles.length > 0">
+    <h3>Habitaciones Disponibles</h3>
+    <form (ngSubmit)="reservar()">
+      <div class="habitaciones-grid">
+        <div *ngFor="let hab of habitacionesDisponibles" class="habitacion-card">
+            <div class="habitacion-card-imagen" (click)="abrirModal(hab)" style="cursor:pointer;">
+                <img [src]="hab.imagen || 'assets/default_room.jpg'" alt="Habitación {{ hab.numero }}" />
+            </div>
+            <div class="habitacion-card-contenido">
+                <h4>{{ hab.tipo }} - N° {{ hab.numero }}</h4>
+                <div class="precio">Precio: ${{ hab.precio }}</div>
+                <div class="habitacion-card-acciones">
+                <input
+                type="radio"
+                name="habitacionSeleccionada"
+                [value]="hab.id"
+                [(ngModel)]="habitacionSeleccionada"
+                required
+                (change)="abrirModal(hab)"
+                />
+                <label>Seleccionar</label>
+                </div>
+            </div>
+            </div>
+
+      </div>
+      <button type="submit" class="boton-reservar-seleccion">Reservar Selección</button>
+    </form>
+  </section>
+</div>
+<div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()"></div>
+<div class="modal" *ngIf="mostrarModal">
+  <button class="modal-close" (click)="cerrarModal()">×</button>
+  <h2>{{ habitacionDetalle?.tipo }} - N° {{ habitacionDetalle?.numero }}</h2>
+  <img [src]="habitacionDetalle?.imagen || 'assets/default_room.jpg'" alt="Habitación" />
+  <p><strong>Descripción:</strong> {{ habitacionDetalle?.descripcion }}</p>
+  <p><strong>Servicios:</strong> {{ habitacionDetalle?.servicios }}</p>
+  <p><strong>Precio:</strong> ${{ habitacionDetalle?.precio }}</p>
+  <p><strong>Disponible:</strong> {{ habitacionDetalle?.disponible ? 'Sí' : 'No' }}</p>
+</div>
+<app-footer></app-footer>
+

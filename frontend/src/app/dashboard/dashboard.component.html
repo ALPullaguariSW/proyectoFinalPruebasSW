@@ -1,0 +1,36 @@
+<app-header></app-header>
+<div class="dashboard-header">
+  <div class="container">
+    <h1>Bienvenido a HotelSys</h1>
+    <p class="welcome-message">Hola, {{ usuarioNombre }}. ¿Qué te gustaría hacer hoy?</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="dashboard-menu">
+    <a class="menu-card" routerLink="/booking">
+      <div class="icon-wrapper">
+        <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Reservar" width="48" height="48" />
+      </div>
+      <h3>Realizar una Reserva</h3>
+      <p>Busca y reserva tu habitación ideal.</p>
+    </a>
+
+    <a class="menu-card" routerLink="/mis-reservas">
+      <div class="icon-wrapper">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" alt="Mis reservas" width="48" height="48" />
+      </div>
+      <h3>Ver Mis Reservas</h3>
+      <p>Consulta y gestiona tus reservas activas.</p>
+    </a>
+
+    <a class="menu-card" (click)="logout()" style="cursor:pointer;">
+      <div class="icon-wrapper">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Cerrar sesión" width="48" height="48" />
+      </div>
+      <h3>Cerrar Sesión</h3>
+      <p>Finaliza tu sesión de forma segura.</p>
+    </a>
+  </div>
+</div>
+<app-footer></app-footer>

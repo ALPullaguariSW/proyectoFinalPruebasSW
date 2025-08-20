@@ -1,0 +1,285 @@
+/* Variables de colores */
+:root {
+    --primary-color: #2563eb;    /* Azul principal */
+    --secondary-color: #10b981;  /* Verde secundario */
+    --accent-color: #f59e0b;     /* Naranja acento */
+    --text-color: #1f2937;       /* Texto oscuro */
+    --light-text: #6b7280;       /* Texto claro */
+    --background: #ffffff;        /* Fondo blanco */
+    --light-bg: #f9fafb;         /* Fondo claro */
+    --border-color: #e5e7eb;     /* Color de bordes */
+}
+
+/* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* Main content */
+.main {
+    padding: 3rem 0;
+    min-height: 70vh;
+}
+
+.main h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.main h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* Profile section */
+.profile {
+    background: var(--light-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 3rem;
+    border: 1px solid var(--border-color);
+}
+
+.profile-info {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.info-group {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.info-group label {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 200px;
+    margin-right: 1rem;
+}
+
+.info-group span {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+/* Presentation */
+.presentation {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.presentation h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.presentation p {
+    color: var(--text-color);
+    line-height: 1.7;
+}
+
+/* Personal info */
+.personal-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+}
+
+.personal-info h3 {
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.personal-info ul {
+    list-style: none;
+}
+
+.personal-info li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.personal-info li:last-child {
+    border-bottom: none;
+}
+
+/* Project info */
+.project-info {
+    margin-top: 3rem;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.project-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+.project-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.project-card ul {
+    list-style: none;
+}
+
+.project-card li {
+    padding: 0.5rem 0;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.project-card li:last-child {
+    border-bottom: none;
+}
+
+.project-card strong {
+    color: var(--secondary-color);
+}
+
+/* Footer */
+.footer {
+    background: var(--text-color);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.footer p:last-child {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+    
+    .profile-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .info-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .info-group label {
+        min-width: auto;
+        margin-right: 0;
+    }
+    
+    .project-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .main {
+        padding: 2rem 0;
+    }
+    
+    .profile, .project-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .main h2 {
+        font-size: 1.5rem;
+    }
+    
+    .profile, .project-card {
+        padding: 1rem;
+    }
+}
+
+
