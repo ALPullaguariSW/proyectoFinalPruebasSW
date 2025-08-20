@@ -27,7 +27,9 @@
             ],
             "styles": [
               "src/styles.css"
-            ]
+            ],
+            "outputPath": "dist",
+            "baseHref": "/Plataforma_reservas_A/"
           },
           "configurations": {
             "production": {
@@ -43,7 +45,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/Plataforma_reservas_A/"
             },
             "development": {
               "optimization": false,
@@ -95,8 +98,7 @@
               "src/**/*.enum.ts",
               "src/**/*.interface.ts",
               "src/**/*.model.ts",
-              "src/**/*.pipe.ts",
-              "src/**/*.service.ts"
+              "src/**/*.pipe.ts"
             ]
           }
         }

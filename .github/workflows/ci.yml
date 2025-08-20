@@ -1,114 +1,132 @@
-name: CI - Plataforma de Reservas
+name: CI - Integración Continua
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
-  backend:
+  backend-ci:
     name: Backend CI
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-
+    
     steps:
-    - name: Checkout
+    - name: Checkout código
       uses: actions/checkout@v4
-
-    - name: Use Node.js 20
+      
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
-        cache: npm
+        node-version: '18'
+        cache: 'npm'
         cache-dependency-path: backend/package-lock.json
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Lint
+        
+    - name: Instalar dependencias del backend
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Ejecutar linting
+      working-directory: ./backend
       run: npm run lint
-
-    - name: Test with coverage
+      
+    - name: Ejecutar tests unitarios del backend
+      working-directory: ./backend
       run: npm test
-
-    - name: Upload coverage reports
+      
+    - name: Subir reporte de cobertura a Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./backend/coverage
+        flags: backend
+        name: backend-coverage
+        
+    - name: Publicar artefactos de cobertura del backend
       uses: actions/upload-artifact@v4
       with:
         name: backend-coverage
         path: backend/coverage/
+        retention-days: 30
 
-  frontend:
+  frontend-ci:
     name: Frontend CI
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-
+    
     steps:
-    - name: Checkout
+    - name: Checkout código
       uses: actions/checkout@v4
-
-    - name: Use Node.js 20
+      
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
-        cache: npm
+        node-version: '18'
+        cache: 'npm'
         cache-dependency-path: frontend/package-lock.json
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Test
+        
+    - name: Instalar dependencias del frontend
+      working-directory: ./frontend
+      run: npm ci
+      
+    - name: Ejecutar tests unitarios del frontend
+      working-directory: ./frontend
       run: npm run test:ci
-
-    - name: Build
-      run: npm run build -- --configuration=production
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/dist/
-
-    - name: Upload coverage reports
+      
+    - name: Publicar artefactos de cobertura del frontend
       uses: actions/upload-artifact@v4
       with:
         name: frontend-coverage
         path: frontend/coverage/
+        retention-days: 30
 
-  performance:
+  # Job de performance con k6
+  performance-tests:
     name: Performance Tests (k6)
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
-    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'perf')
-
+    needs: [backend-ci, frontend-ci]
+    
     steps:
-    - name: Checkout
+    - name: Checkout código
       uses: actions/checkout@v4
-
-    - name: Install k6
-      uses: grafana/k6-action@v0.4.0
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        k6-version: v0.47.0
-
-    - name: Start backend server
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Instalar dependencias del backend
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Instalar k6
       run: |
-        cd backend
-        npm install
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+        
+    - name: Iniciar backend en background
+      working-directory: ./backend
+      run: |
         npm start &
         sleep 10
-
-    - name: Run k6 tests
-      run: |
-        k6 run tests/k6/ramp-load.js --out json=results-ramp.json
-        k6 run tests/k6/spike.js --out json=results-spike.json
-        k6 run tests/k6/soak.js --out json=results-soak.json
-
-    - name: Upload k6 results
+        
+    - name: Ejecutar test de Ramp/Load
+      run: k6 run tests/k6/ramp-load.js --out json=results-ramp.json --out junit=results-ramp.xml
+      
+    - name: Ejecutar test de Spike
+      run: k6 run tests/k6/spike.js --out json=results-spike.json --out junit=results-spike.xml
+      
+    - name: Ejecutar test de Soak
+      run: k6 run tests/k6/soak.js --out json=results-soak.json --out junit=results-soak.xml
+      
+    - name: Publicar resultados de performance
       uses: actions/upload-artifact@v4
       with:
         name: k6-results
-        path: results-*.json
+        path: |
+          results-*.json
+          results-*.xml
+        retention-days: 30

@@ -88,13 +88,17 @@ PORT=3000
 DB_HOST=localhost
 DB_USER=usuario
 DB_PASSWORD=clave
-DB_NAME=reservas_db
+DB_NAME=    reservas_db
 JWT_SECRET=alguno-seguro
 ```
 
-### GitHub Actions Secrets
-- `RENDER_TOKEN`: Token de API de Render
-- `RENDER_SERVICE_ID`: ID del servicio en Render
+### Configuración de GitHub Pages
+
+Para habilitar GitHub Pages:
+
+1. Ir a Settings > Pages del repositorio
+2. Source: "GitHub Actions"
+3. El despliegue se ejecutará automáticamente en push a main
 
 ## Despliegue
 
@@ -103,10 +107,10 @@ JWT_SECRET=alguno-seguro
 2. Se despliega desde `frontend/dist/`
 3. URL: `https://{username}.github.io/{repo-name}`
 
-### Backend (Render)
-1. Se despliega automáticamente después de CI exitoso
-2. Usa la API de Render para trigger de deploy
-3. Configurar variables de entorno en Render dashboard
+### Backend (Local)
+1. Ejecutar localmente con `npm start` en el directorio `backend/`
+2. Puerto por defecto: 3000
+3. Base de datos: SQLite local (development) / PostgreSQL (production)
 
 ## Monitoreo y Métricas
 
