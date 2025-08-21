@@ -4,7 +4,11 @@ services:
     env: node
     plan: free
     buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    startCommand: |
+      cd backend
+      # Inicializar base de datos si es necesario
+      npm run init-db || echo "Base de datos ya inicializada"
+      npm start
     envVars:
       - key: NODE_ENV
         value: production

@@ -7,7 +7,8 @@
     "start": "node server.js",
     "test": "jest --coverage --ci",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "init-db": "node scripts/init-db.js"
   },
   "keywords": [],
   "author": "",
