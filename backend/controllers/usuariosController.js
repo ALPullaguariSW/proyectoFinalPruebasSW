@@ -109,18 +109,18 @@ exports.reservarHabitacion = async (req, res) => {
   // Consultar disponibilidad
   if (accion === 'consultar') {
     try {
-      let sql = `SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
-        NOT EXISTS (
-          SELECT 1 FROM reservas r
-          WHERE r.habitacion_id = h.id
-          AND NOT (r.fecha_fin <= ? OR r.fecha_inicio >= ?)
-        ) AS disponible
-        FROM habitaciones h`;
-      const params = [fecha_inicio, fecha_fin];
-      if (tipo_habitacion) {
-        sql += ' WHERE h.tipo = ?';
-        params.push(tipo_habitacion);
-      }
+             let sql = `SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
+         NOT EXISTS (
+           SELECT 1 FROM reservas r
+           WHERE r.habitacion_id = h.id
+           AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
+         ) AS disponible
+         FROM habitaciones h`;
+       const params = [fecha_inicio, fecha_fin];
+       if (tipo_habitacion) {
+         sql += ' WHERE h.tipo = $3';
+         params.push(tipo_habitacion);
+       }
       sql += ' ORDER BY h.tipo, h.precio, h.numero';
       const { rows: habitaciones } = await pool.query(sql, params);
       return res.json({ habitaciones });
@@ -217,21 +217,21 @@ exports.obtenerHabitacionesDisponibles = async (req, res) => {
   }
 
   try {
-    const sql = `
-      SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
-        NOT EXISTS (
-          SELECT 1 FROM reservas r
-          WHERE r.habitacion_id = h.id
-            AND NOT (r.fecha_fin <= ? OR r.fecha_inicio >= ?)
-        ) AS disponible
-      FROM habitaciones h
-      WHERE (? IS NULL OR h.tipo = ?)
-      ORDER BY h.tipo, h.precio, h.numero
-    `;
+         const sql = `
+       SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
+         NOT EXISTS (
+           SELECT 1 FROM reservas r
+           WHERE r.habitacion_id = h.id
+             AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
+         ) AS disponible
+       FROM habitaciones h
+       WHERE ($3 IS NULL OR h.tipo = $4)
+       ORDER BY h.tipo, h.precio, h.numero
+     `;
 
-    const params = [fecha_inicio, fecha_fin, tipo_habitacion || null, tipo_habitacion || null];
+     const params = [fecha_inicio, fecha_fin, tipo_habitacion || null, tipo_habitacion || null];
 
-    const [habitaciones] = await connection.promise().query(sql, params);
+    const { rows: habitaciones } = await pool.query(sql, params);
 
     return res.json({ habitaciones });
   } catch (error) {
