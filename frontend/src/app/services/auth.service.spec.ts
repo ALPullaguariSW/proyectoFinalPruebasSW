@@ -1,74 +1,148 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from './auth.service';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { AuthService, Usuario } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [AuthService]
-    });
+    TestBed.configureTestingModule({});
     service = TestBed.inject(AuthService);
-    httpMock = TestBed.inject(HttpTestingController);
+    // Limpiar localStorage antes de cada test
+    localStorage.clear();
   });
 
   afterEach(() => {
-    httpMock.verify();
+    localStorage.clear();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should login successfully', () => {
-    const mockUser = { email: 'test@test.com', password: 'password' };
-    const mockResponse = { token: 'fake-token', user: { id: 1, email: 'test@test.com' } };
+  it('should login user and store in localStorage', () => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+    const mockToken = 'test-token';
 
-    service.login(mockUser.email, mockUser.password).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
+    service.login(mockUser, mockToken);
 
-    const req = httpMock.expectOne('/api/auth/login');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(mockUser);
-    req.flush(mockResponse);
+    const storedUser = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const storedToken = localStorage.getItem('token');
+
+    expect(storedUser).toEqual(mockUser);
+    expect(storedToken).toBe(mockToken);
   });
 
-  it('should register successfully', () => {
-    const mockUser = { email: 'test@test.com', password: 'password', nombre: 'Test User' };
-    const mockResponse = { message: 'Usuario registrado exitosamente' };
+  it('should login user without token', () => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
 
-    service.register(mockUser).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
+    service.login(mockUser);
 
-    const req = httpMock.expectOne('/api/auth/register');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(mockUser);
-    req.flush(mockResponse);
+    const storedUser = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const storedToken = localStorage.getItem('token');
+
+    expect(storedUser).toEqual(mockUser);
+    expect(storedToken).toBeNull();
   });
 
-  it('should logout and clear token', () => {
-    spyOn(localStorage, 'removeItem');
+  it('should logout user and clear localStorage', () => {
+    // Primero hacer login
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+    service.login(mockUser, 'test-token');
+
+    // Luego hacer logout
     service.logout();
-    expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+
+    expect(localStorage.getItem('usuario')).toBeNull();
+    expect(localStorage.getItem('token')).toBeNull();
   });
 
-  it('should check if user is logged in', () => {
-    spyOn(localStorage, 'getItem').and.returnValue('fake-token');
-    expect(service.isLoggedIn()).toBe(true);
+  it('should get current user', () => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.login(mockUser);
+    const currentUser = service.getUsuario();
+
+    expect(currentUser).toEqual(mockUser);
   });
 
-  it('should return false when user is not logged in', () => {
-    spyOn(localStorage, 'getItem').and.returnValue(null);
-    expect(service.isLoggedIn()).toBe(false);
+  it('should get stored token', () => {
+    const mockToken = 'test-token';
+    localStorage.setItem('token', mockToken);
+
+    const token = service.getToken();
+
+    expect(token).toBe(mockToken);
   });
 
-  it('should get token from localStorage', () => {
-    spyOn(localStorage, 'getItem').and.returnValue('fake-token');
-    expect(service.getToken()).toBe('fake-token');
+  it('should return null for non-existent token', () => {
+    const token = service.getToken();
+
+    expect(token).toBeNull();
+  });
+
+  it('should load user from localStorage on initialization', () => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+    localStorage.setItem('usuario', JSON.stringify(mockUser));
+
+    // Crear nueva instancia del servicio
+    const newService = TestBed.inject(AuthService);
+    const currentUser = newService.getUsuario();
+
+    expect(currentUser).toEqual(mockUser);
+  });
+
+  it('should emit user changes through observable', (done) => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.usuario$.subscribe(user => {
+      if (user) {
+        expect(user).toEqual(mockUser);
+        done();
+      }
+    });
+
+    service.login(mockUser);
+  });
+
+  it('should emit null on logout through observable', (done) => {
+    const mockUser: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.login(mockUser);
+
+    service.usuario$.subscribe(user => {
+      if (user === null) {
+        done();
+      }
+    });
+
+    service.logout();
   });
 });
