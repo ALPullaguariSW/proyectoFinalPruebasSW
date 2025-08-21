@@ -5,8 +5,10 @@ services:
     plan: free
     buildCommand: cd backend && npm install
     startCommand: |
-      # Inicializar base de datos si es necesario
-      npm run init-db || echo "Base de datos ya inicializada"
+      # Forzar inicialización de base de datos
+      echo "🚀 Inicializando base de datos..."
+      npm run init-db
+      echo "✅ Base de datos inicializada, iniciando servidor..."
       npm start
     envVars:
       - key: NODE_ENV
