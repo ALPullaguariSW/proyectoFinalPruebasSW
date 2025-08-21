@@ -1,9 +1,3 @@
-databases:
-  - name: plataforma-reservas-db
-    databaseName: plataforma_reservas
-    user: plataforma_user
-    plan: free
-
 services:
   - type: web
     name: plataforma-reservas-backend
@@ -15,9 +9,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: plataforma-reservas-db
-          property: connectionString
+        value: postgresql://reservas_db_knfd_user:fPLvTe9gRVqQuhUSgcQmv7ehmNfDMqRk@dpg-d2j4m5gdl3ps738nulb0-a.oregon-postgres.render.com/reservas_db_knfd
       - key: JWT_SECRET
         generateValue: true
       - key: PORT
