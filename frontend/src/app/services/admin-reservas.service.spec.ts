@@ -9,19 +9,12 @@ describe('AdminReservasService', () => {
   const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com/api';
 
   beforeEach(() => {
-    // Mockear que estamos en GitHub Pages para que use la URL de Render
-    Object.defineProperty(window, 'location', {
-      value: { hostname: 'alpullaguarisw.github.io' },
-      writable: true
-    });
-
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [AdminReservasService]
     });
     service = TestBed.inject(AdminReservasService);
     httpMock = TestBed.inject(HttpTestingController);
-    authService = TestBed.inject(AuthService);
   });
 
   afterEach(() => {

@@ -9,12 +9,6 @@ describe('BookingService', () => {
   const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com';
 
   beforeEach(() => {
-    // Mockear que estamos en GitHub Pages para que use la URL de Render
-    Object.defineProperty(window, 'location', {
-      value: { hostname: 'alpullaguarisw.github.io' },
-      writable: true
-    });
-
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [BookingService]
