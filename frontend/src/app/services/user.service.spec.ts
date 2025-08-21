@@ -5,7 +5,7 @@ import { UserService } from './user.service';
 describe('UserService', () => {
   let service: UserService;
   let httpMock: HttpTestingController;
-  const API_BASE_URL = 'http://localhost:3000/api';
+  const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({

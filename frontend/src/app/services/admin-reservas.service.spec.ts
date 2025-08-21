@@ -5,7 +5,7 @@ import { AdminReservasService } from './admin-reservas.service';
 describe('AdminReservasService', () => {
   let service: AdminReservasService;
   let httpMock: HttpTestingController;
-  const API_BASE_URL = 'http://localhost:3000/api';
+  const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({

@@ -5,7 +5,7 @@ import { BookingService } from './booking.service';
 describe('BookingService', () => {
   let service: BookingService;
   let httpMock: HttpTestingController;
-  const API_BASE_URL = 'http://localhost:3000';
+  const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
