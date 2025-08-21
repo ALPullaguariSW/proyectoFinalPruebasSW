@@ -6,8 +6,8 @@ async function initializeDatabase() {
   try {
     console.log('🚀 Inicializando base de datos...');
     
-    // Leer el archivo init.sql
-    const initSqlPath = path.join(__dirname, '..', 'init.sql');
+    // Leer el archivo init-postgres.sql (compatible con PostgreSQL)
+    const initSqlPath = path.join(__dirname, '..', 'init-postgres.sql');
     
     if (!fs.existsSync(initSqlPath)) {
       console.log('⚠️  Archivo init.sql no encontrado, creando esquema básico...');
