@@ -137,6 +137,12 @@ k6 run soak.js
 - ✅ Despliegue automático del frontend a GitHub Pages
 - ✅ Actualización automática del README con URLs
 
+### **⚠️ Configuración Requerida**
+Para que el despliegue automático funcione, debes configurar el secret `RENDER_API_KEY` en GitHub:
+1. Ve a **Settings** → **Secrets and variables** → **Actions**
+2. Crea un nuevo secret: `RENDER_API_KEY`
+3. Valor: Tu API key de Render (https://dashboard.render.com/account/api-keys)
+
 ## 🌐 URLs de Despliegue
 
 - **Frontend**: [GitHub Pages](https://TU_USUARIO.github.io/TU_REPO/)
