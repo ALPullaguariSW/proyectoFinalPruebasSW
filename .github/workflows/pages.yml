@@ -43,7 +43,7 @@ jobs:
         run: |
           cd frontend
           # Crear archivo runtime-api.js con la URL de Render
-          echo "<script>window.__API_BASE_URL__='https://plataforma-reservas-backend.onrender.com'</script>" > src/assets/runtime-api.js
+          echo "<script>window.__API_BASE_URL__='https://proyectofinalpruebassw.onrender.com'</script>" > src/assets/runtime-api.js
           npm run build -- --configuration ci
 
       - name: Setup Pages
