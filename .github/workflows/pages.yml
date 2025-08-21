@@ -44,7 +44,7 @@ jobs:
           cd frontend
           # Crear archivo runtime-api.js con la URL de Render
           echo "<script>window.__API_BASE_URL__='https://proyectofinalpruebassw.onrender.com'</script>" > src/assets/runtime-api.js
-          npm run build -- --configuration ci
+          npm run build -- --configuration=ci
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -52,7 +52,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist
+          path: frontend/dist/browser
 
       - name: Deploy to GitHub Pages
         id: deployment
