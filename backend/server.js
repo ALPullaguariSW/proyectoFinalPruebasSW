@@ -10,6 +10,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Middleware de logging para debugging
+app.use((req, res, next) => {
+  console.log(`🔍 ${req.method} ${req.path} - Body:`, req.body);
+  console.log(`🔍 Headers:`, req.headers);
+  next();
+});
+
 // Conexión a la base de datos
 const pool = require('./config/db');
 
