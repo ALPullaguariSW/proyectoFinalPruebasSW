@@ -197,11 +197,10 @@ exports.misReservas = async (req, res) => {
 
 exports.obtenerTiposHabitacion = async (req, res) => {
   try {
-    const { rows: tipos } = await pool.query('SELECT DISTINCT tipo FROM habitaciones ORDER BY tipo');
-    const listaTipos = tipos.map(t => t.tipo);
-    res.json(listaTipos);
+    const { rows: tipos } = await pool.query('SELECT id, nombre, descripcion, precio, capacidad FROM tipos_habitacion ORDER BY nombre');
+    res.json(tipos);
   } catch (error) {
-    console.error(error);
+    console.error('Error en obtenerTiposHabitacion:', error);
     res.status(500).json({ mensaje: 'Error al obtener tipos de habitación.' });
   }
 };
