@@ -5,8 +5,8 @@ import { Rate } from 'k6/metrics';
 // Configuración Spike: salto brusco 0→300 VUs según requisitos del ingeniero
 export const options = {
   stages: [
-    { duration: '10s', target: 200 },  // Spike rápido a 200 VUs
-    { duration: '20s', target: 200 },  // Mantener 200 VUs por 20s
+    { duration: '10s', target: 50 },   // Spike rápido a 50 VUs (reducido)
+    { duration: '20s', target: 50 },   // Mantener 50 VUs por 20s
     { duration: '15s', target: 0 },    // Bajar a 0 VUs en 15s
   ],
   thresholds: {

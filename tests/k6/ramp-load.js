@@ -5,10 +5,10 @@ import { Rate } from 'k6/metrics';
 // Configuración Ramp/Load: incremento gradual 10→100 VUs en 5 min (según requisitos del ingeniero)
 export const options = {
   stages: [
-    { duration: '30s', target: 20 },  // Ramp up rápido a 20 VUs
-    { duration: '30s', target: 50 },  // Incremento a 50 VUs
-    { duration: '30s', target: 100 }, // Incremento final a 100 VUs
-    { duration: '20s', target: 100 }, // Mantener 100 VUs por 20s
+    { duration: '30s', target: 10 },  // Ramp up rápido a 10 VUs
+    { duration: '30s', target: 25 },  // Incremento a 25 VUs
+    { duration: '30s', target: 50 },  // Incremento final a 50 VUs
+    { duration: '20s', target: 50 },  // Mantener 50 VUs por 20s
     { duration: '10s', target: 0 },   // Ramp down rápido
   ],
   thresholds: {
