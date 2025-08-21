@@ -1,4 +1,4 @@
-name: Continuous Deployment
+name: Continuous Deployment - Backend
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       - name: Deploy Backend to Render
         run: |
           # Deploy using Render Blueprint (Infrastructure as Code)
-          curl -X POST "https://api.render.com/v1/services" \
+          curl -X POST "https://api.render.com/v1/blueprint-instances" \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
             -d @render.yaml
@@ -31,50 +31,6 @@ jobs:
           echo "- **URL:** https://plataforma-reservas-backend.onrender.com" >> README.md
           echo "- **Health Check:** https://plataforma-reservas-backend.onrender.com/api/health" >> README.md
           
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        run: |
-          cd frontend
-          npm ci
-
-      - name: Build frontend
-        run: |
-          cd frontend
-          npm run build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: frontend/dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Update README with deployment info
-        run: |
-          # Update README with frontend deployment info
-          echo "## Despliegue Frontend" >> README.md
-          echo "- **URL:** https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" >> README.md
-          echo "- **Último despliegue:** $(date)" >> README.md
-          
       - name: Comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -84,5 +40,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 **Frontend desplegado exitosamente a GitHub Pages!**\n\n✅ **URL:** https://${context.repo.owner}.github.io/${context.repo.repo}\n\n🔧 **Backend:** Desplegado a Render\n📊 **Cobertura:** CI superó el 90% requerido\n\nEl despliegue se realizó automáticamente después de que las pruebas pasaron exitosamente.`
+              body: `🚀 **Backend desplegado exitosamente a Render!**\n\n🔧 **Backend:** https://plataforma-reservas-backend.onrender.com\n📊 **Cobertura:** CI superó el 90% requerido\n\nEl despliegue se realizó automáticamente después de que las pruebas pasaron exitosamente.`
             })
