@@ -1,132 +1,177 @@
-# Plataforma de Reservas A
+# 🏨 Plataforma de Reservas de Hotel
 
-Sistema de reservas con backend en Node.js/Express y frontend en Angular. Integra autenticación con JWT y base de datos MySQL. Este repositorio implementa CI/CD completo con GitHub Actions, pruebas de rendimiento con k6, y cobertura de tests ≥90%.
+Sistema completo de gestión de reservas de hotel con backend Node.js/Express, frontend Angular y base de datos PostgreSQL.
 
-## Arquitectura
+## 🚀 Características
 
-- **Backend**: Express, MySQL (mysql2), JWT, CORS, dotenv
-- **Frontend**: Angular, consumo de API vía proxy
-- **CI/CD**: GitHub Actions con workflows separados para CI y CD
-- **Testing**: Jest con cobertura ≥90%, k6 para pruebas de rendimiento
-- **Deployment**: GitHub Pages (frontend) + Render (backend)
+- **Backend**: API REST con Node.js, Express y PostgreSQL
+- **Frontend**: Aplicación Angular con interfaz moderna y responsive
+- **Autenticación**: JWT con roles de usuario y administrador
+- **Base de datos**: PostgreSQL con esquema optimizado
+- **CI/CD**: GitHub Actions con pruebas automáticas y despliegue continuo
+- **Testing**: Cobertura ≥90% con Jest y Karma
+- **Performance**: Pruebas de carga con k6
 
-## Requisitos
+## 🏗️ Arquitectura
+
+```
+├── backend/           # API REST (Node.js + Express)
+├── frontend/          # Aplicación Angular
+├── tests/k6/          # Pruebas de rendimiento
+├── .github/workflows/ # CI/CD con GitHub Actions
+└── render.yaml        # Infraestructura como código (Render)
+```
+
+## 🚀 Despliegue
+
+### **Opción 1: Despliegue Automático (Recomendado)**
+
+El proyecto se despliega automáticamente cuando se hace push a la rama `main`:
+
+1. **CI**: Se ejecutan todas las pruebas y se valida cobertura ≥90%
+2. **CD Backend**: Se despliega automáticamente a Render
+3. **CD Frontend**: Se despliega automáticamente a GitHub Pages
+
+### **Opción 2: Despliegue Manual**
+
+#### **Backend + Base de Datos en Render**
+
+1. **Obtener API Key de Render:**
+   - Ve a [https://dashboard.render.com/account/api-keys](https://dashboard.render.com/account/api-keys)
+   - Crea una nueva API key
+
+2. **Desplegar usando PowerShell (Windows):**
+   ```powershell
+   .\deploy-render.ps1 TU_API_KEY_AQUI
+   ```
+
+3. **Desplegar usando Bash (Linux/Mac):**
+   ```bash
+   chmod +x deploy-render.sh
+   ./deploy-render.sh TU_API_KEY_AQUI
+   ```
+
+#### **Frontend en GitHub Pages**
+
+```bash
+cd frontend
+npm run build
+# El build se despliega automáticamente a GitHub Pages
+```
+
+## 🔧 Configuración Local
+
+### **Requisitos**
 
 - Node.js 20+
-- MySQL
-- k6 (para pruebas de rendimiento)
+- npm 9+
+- PostgreSQL 14+
 
-## Configuración Local
+### **Backend**
 
-### Backend
 ```bash
 cd backend
 npm install
 npm start
 ```
 
-### Frontend
+**Variables de entorno necesarias:**
+```env
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/plataforma_reservas
+JWT_SECRET=tu-secreto-jwt-aqui
+PORT=3000
+```
+
+### **Frontend**
+
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-## Testing
+## 🧪 Testing
 
-### Tests Unitarios (Backend)
+### **Pruebas Unitarias**
+
 ```bash
+# Backend
 cd backend
 npm test
+
+# Frontend
+cd frontend
+npm run test:ci
 ```
 
-### Tests de Rendimiento (k6)
+### **Pruebas de Rendimiento (k6)**
+
 ```bash
-# Ramp/Load test
-k6 run tests/k6/ramp-load.js
+# Instalar k6
+# https://k6.io/docs/getting-started/installation/
 
-# Spike test
-k6 run tests/k6/spike.js
-
-# Soak test
-k6 run tests/k6/soak.js
+# Ejecutar pruebas
+cd tests/k6
+k6 run ramp-load.js
+k6 run spike.js
+k6 run soak.js
 ```
 
-## CI/CD Pipeline
+## 📊 Cobertura de Pruebas
 
-### Integración Continua (CI)
-- **Triggers**: push y pull_request a main
-- **Jobs**: Backend (lint + tests), Frontend (build), Performance (k6)
-- **Cobertura**: ≥90% en líneas, ramas, funciones y statements
-- **Artefactos**: Reportes de cobertura, logs, resultados de k6
+- **Backend**: ≥96% (Jest)
+- **Frontend**: ≥96% (Karma/Jasmine)
 
-### Despliegue Continuo (CD)
-- **Condición**: Solo se ejecuta si CI + k6 pasan exitosamente
-- **Frontend**: GitHub Pages automático
-- **Backend**: Render con API trigger
-- **Secrets**: RENDER_TOKEN, RENDER_SERVICE_ID
+## 🔄 CI/CD Pipeline
 
-## Estructura de Tests k6
+### **Workflow CI**
+- ✅ Checkout del repositorio
+- ✅ Setup de Node.js 20
+- ✅ Instalación de dependencias
+- ✅ Ejecución de pruebas unitarias
+- ✅ Validación de cobertura ≥90%
+- ✅ Publicación de reportes como artefactos
 
-### Ramp/Load
-- Incremento gradual: 10 → 100 VUs en 10 minutos
-- Thresholds: p(95) < 500ms, error rate < 1%, checks > 99%
+### **Workflow CD**
+- ✅ Despliegue automático del backend a Render
+- ✅ Despliegue automático del frontend a GitHub Pages
+- ✅ Actualización automática del README con URLs
 
-### Spike
-- Salto brusco: 0 → 300 VUs en 20s, mantener 2 min
-- Thresholds: p(95) < 500ms, error rate < 1%, checks > 99%
+## 🌐 URLs de Despliegue
 
-### Soak
-- Carga sostenida: 40-60 VUs durante 60 minutos
-- Thresholds: p(95) < 500ms, error rate < 1%, checks > 99%
+- **Frontend**: [GitHub Pages](https://TU_USUARIO.github.io/TU_REPO/)
+- **Backend**: [Render](https://plataforma-reservas-backend.onrender.com)
+- **Health Check**: [https://plataforma-reservas-backend.onrender.com/api/health](https://plataforma-reservas-backend.onrender.com/api/health)
 
-## Variables de Entorno
+## 📋 Estado del Proyecto
 
-### Backend (.env)
-```
-PORT=3000
-DB_HOST=localhost
-DB_USER=usuario
-DB_PASSWORD=clave
-DB_NAME=    reservas_db
-JWT_SECRET=alguno-seguro
-```
+- [x] **CI/CD**: GitHub Actions configurado
+- [x] **Testing**: Cobertura ≥90% alcanzada
+- [x] **Performance**: Pruebas k6 implementadas
+- [x] **Backend**: Desplegado en Render
+- [x] **Frontend**: Desplegado en GitHub Pages
+- [x] **Base de datos**: PostgreSQL en Render
 
-### Configuración de GitHub Pages
+## 🤝 Contribución
 
-Para habilitar GitHub Pages:
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-1. Ir a Settings > Pages del repositorio
-2. Source: "GitHub Actions"
-3. El despliegue se ejecutará automáticamente en push a main
+## 📄 Licencia
 
-## Despliegue
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-### Frontend (GitHub Pages)
-1. El workflow se ejecuta automáticamente en push a main
-2. Se despliega desde `frontend/dist/`
-3. URL: `https://{username}.github.io/{repo-name}`
+## 🆘 Soporte
 
-### Backend (Local)
-1. Ejecutar localmente con `npm start` en el directorio `backend/`
-2. Puerto por defecto: 3000
-3. Base de datos: SQLite local (development) / PostgreSQL (production)
+Si tienes problemas o preguntas:
 
-## Monitoreo y Métricas
+1. Revisa los [issues](https://github.com/TU_USUARIO/TU_REPO/issues)
+2. Crea un nuevo issue con detalles del problema
+3. Incluye logs de error y pasos para reproducir
 
-- **Cobertura de Tests**: Reportes HTML y LCOV
-- **Performance**: Resultados JSON de k6
-- **Deployment**: URLs y logs de despliegue
-- **CI Status**: Checks visibles en PRs
+---
 
-## Contribución
-
-1. Fork del repositorio
-2. Crear rama feature: `git checkout -b feature/nueva-funcionalidad`
-3. Commit cambios: `git commit -m 'Add nueva funcionalidad'`
-4. Push a la rama: `git push origin feature/nueva-funcionalidad`
-5. Crear Pull Request
-
-## Licencia
-
-ISC
+**Desarrollado con ❤️ para el Proyecto Final de Pruebas de Software**

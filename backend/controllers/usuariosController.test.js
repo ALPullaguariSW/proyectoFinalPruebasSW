@@ -46,6 +46,39 @@ describe('UsuariosController', () => {
       });
     });
 
+    it('should return error for missing fields', async () => {
+      mockReq.body = {
+        nombre: 'Juan',
+        correo: 'juan@test.com'
+        // Missing contrasena and confirm_contrasena
+      };
+
+      await usuariosController.registroUsuario(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Todos los campos son obligatorios.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should return error for password without lowercase', async () => {
+      mockReq.body = {
+        nombre: 'Juan',
+        correo: 'juan@test.com',
+        contrasena: 'TEST123!',
+        confirm_contrasena: 'TEST123!'
+      };
+
+      await usuariosController.registroUsuario(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'La contraseña debe contener al menos una letra minúscula.',
+        claseMensaje: 'error'
+      });
+    });
+
     it('should return error for invalid email format', async () => {
       mockReq.body = {
         nombre: 'Juan',
@@ -285,6 +318,92 @@ describe('UsuariosController', () => {
         claseMensaje: 'error'
       });
     });
+
+    it('should return error when dates are missing', async () => {
+      mockReq.body = {
+        accion: 'consultar'
+      };
+
+      await usuariosController.reservarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Las fechas de entrada y salida son requeridas.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should return error when habitacion_id is missing for reservar', async () => {
+      mockReq.body = {
+        usuario_id: 1,
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17',
+        accion: 'reservar'
+      };
+
+      await usuariosController.reservarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Debes seleccionar una habitación disponible para reservar.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should return error for invalid action', async () => {
+      mockReq.body = {
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17',
+        accion: 'invalid'
+      };
+
+      await usuariosController.reservarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Acción no válida.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle database error in consultar', async () => {
+      mockReq.body = {
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17',
+        accion: 'consultar'
+      };
+
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.reservarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al buscar habitaciones. Intente más tarde.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle database error in reservar', async () => {
+      mockReq.body = {
+        usuario_id: 1,
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17',
+        habitacion_id: 1,
+        accion: 'reservar'
+      };
+
+      db.query.mockResolvedValueOnce({ rows: [] });
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.reservarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al registrar la reserva. Por favor, inténtelo de nuevo.',
+        claseMensaje: 'error'
+      });
+    });
   });
 
   describe('cancelarReserva', () => {
@@ -320,6 +439,35 @@ describe('UsuariosController', () => {
         claseMensaje: 'error'
       });
     });
+
+    it('should return error when missing data', async () => {
+      mockReq.body = {};
+
+      await usuariosController.cancelarReserva(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Faltan datos para cancelar la reserva.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle database error in cancelarReserva', async () => {
+      mockReq.body = {
+        reserva_id: 1,
+        usuario_id: 1
+      };
+
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.cancelarReserva(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al cancelar la reserva. Intente más tarde.',
+        claseMensaje: 'error'
+      });
+    });
   });
 
   describe('misReservas', () => {
@@ -341,6 +489,32 @@ describe('UsuariosController', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({ reservas: mockReservas });
     });
+
+    it('should return error when usuario_id is missing', async () => {
+      mockReq.params = {};
+
+      await usuariosController.misReservas(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Falta el ID de usuario.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle database error in misReservas', async () => {
+      mockReq.params = { usuario_id: 1 };
+
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.misReservas(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al obtener las reservas. Intente más tarde.',
+        claseMensaje: 'error'
+      });
+    });
   });
 
   describe('obtenerTiposHabitacion', () => {
@@ -355,6 +529,17 @@ describe('UsuariosController', () => {
       await usuariosController.obtenerTiposHabitacion(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith(['Individual', 'Doble']);
+    });
+
+    it('should handle database error in obtenerTiposHabitacion', async () => {
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.obtenerTiposHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al obtener tipos de habitación.'
+      });
     });
   });
 
@@ -386,6 +571,38 @@ describe('UsuariosController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
         mensaje: 'Las fechas de entrada y salida son requeridas.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should return error for invalid dates', async () => {
+      mockReq.query = {
+        fecha_inicio: '2024-01-17',
+        fecha_fin: '2024-01-15'
+      };
+
+      await usuariosController.obtenerHabitacionesDisponibles(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'La fecha de salida debe ser posterior a la fecha de entrada.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle database error in obtenerHabitacionesDisponibles', async () => {
+      mockReq.query = {
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17'
+      };
+
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await usuariosController.obtenerHabitacionesDisponibles(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al buscar habitaciones. Intente más tarde.',
         claseMensaje: 'error'
       });
     });

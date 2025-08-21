@@ -74,6 +74,17 @@ describe('AdminController', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({ reservas: mockReservas });
     });
+
+    it('should handle database error in getProximasReservas', async () => {
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+      
+      await adminController.getProximasReservas(mockReq, mockRes);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al obtener próximas reservas.'
+      });
+    });
   });
 
   describe('listarReservas', () => {
@@ -90,6 +101,17 @@ describe('AdminController', () => {
       await adminController.listarReservas(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith({ reservas: mockReservas });
+    });
+
+    it('should handle database error in listarReservas', async () => {
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+      
+      await adminController.listarReservas(mockReq, mockRes);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al listar reservas.'
+      });
     });
   });
 
@@ -127,6 +149,18 @@ describe('AdminController', () => {
         mensaje: 'Falta el ID de la reserva.'
       });
     });
+
+    it('should handle database error in cancelarReservaAdmin', async () => {
+      mockReq.body = { reserva_id: 1 };
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await adminController.cancelarReservaAdmin(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al cancelar la reserva.'
+      });
+    });
   });
 
   describe('listarHabitaciones', () => {
@@ -141,6 +175,17 @@ describe('AdminController', () => {
       await adminController.listarHabitaciones(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith({ habitaciones: mockHabitaciones });
+    });
+
+    it('should handle database error in listarHabitaciones', async () => {
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+      
+      await adminController.listarHabitaciones(mockReq, mockRes);
+      
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al listar habitaciones.'
+      });
     });
   });
 
@@ -171,6 +216,22 @@ describe('AdminController', () => {
         mensaje: 'El número, tipo y precio son obligatorios.'
       });
     });
+
+    it('should handle database error in crearHabitacion', async () => {
+      mockReq.body = {
+        numero: '101',
+        tipo: 'Individual',
+        precio: 100
+      };
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await adminController.crearHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al crear la habitación.'
+      });
+    });
   });
 
   describe('editarHabitacion', () => {
@@ -188,6 +249,35 @@ describe('AdminController', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({
         mensaje: 'Habitación actualizada correctamente.'
+      });
+    });
+
+    it('should return error when required fields are missing in editarHabitacion', async () => {
+      mockReq.params = { id: 1 };
+      mockReq.body = { numero: '101' };
+
+      await adminController.editarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'El número, tipo y precio son obligatorios.'
+      });
+    });
+
+    it('should handle database error in editarHabitacion', async () => {
+      mockReq.params = { id: 1 };
+      mockReq.body = {
+        numero: '101',
+        tipo: 'Individual',
+        precio: 120
+      };
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await adminController.editarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al actualizar la habitación.'
       });
     });
   });
@@ -246,6 +336,21 @@ describe('AdminController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
         mensaje: 'Fechas inválidas.'
+      });
+    });
+
+    it('should handle database error in disponibilidadHabitaciones', async () => {
+      mockReq.query = {
+        fecha_inicio: '2024-01-15',
+        fecha_fin: '2024-01-17'
+      };
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await adminController.disponibilidadHabitaciones(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al consultar disponibilidad.'
       });
     });
   });

@@ -26,6 +26,10 @@ app.use('/api', usuariosRoutes);
 const adminRoutes = require('./routes/admin');
 app.use('/api/admin', adminRoutes);
 
+// Importar ruta de health check
+const healthRoutes = require('./routes/health');
+app.use('/api', healthRoutes);
+
 // Endpoints sencillos para pruebas de carga (k6)
 app.get('/api/ping-simple', async (req, res) => {
   const delayMs = Math.floor(Math.random() * 500);

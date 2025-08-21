@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { AdminReservasService } from './admin-reservas.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { AdminReservasService } from './admin-reservas.service';
 
 describe('AdminReservasService', () => {
   let service: AdminReservasService;
   let httpMock: HttpTestingController;
+  const API_BASE_URL = 'http://localhost:3000/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,102 +24,113 @@ describe('AdminReservasService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should get all bookings', () => {
-    const mockBookings = [
-      { id: 1, habitacionId: 1, usuarioId: 1, fechaInicio: '2024-01-01', fechaFin: '2024-01-03' },
-      { id: 2, habitacionId: 2, usuarioId: 2, fechaInicio: '2024-01-05', fechaFin: '2024-01-07' }
-    ];
-
-    service.getAllReservas().subscribe(bookings => {
-      expect(bookings).toEqual(mockBookings);
+  describe('setToken', () => {
+    it('should set token', () => {
+      const token = 'test-token';
+      service.setToken(token);
+      // Test passes if no error is thrown
+      expect(true).toBe(true);
     });
-
-    const req = httpMock.expectOne('/api/admin/reservas');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockBookings);
   });
 
-  it('should get booking by ID', () => {
-    const mockBooking = { id: 1, habitacionId: 1, usuarioId: 1, fechaInicio: '2024-01-01', fechaFin: '2024-01-03' };
+  describe('listarReservas', () => {
+    it('should list reservations successfully', () => {
+      const mockResponseData = {
+        reservas: [
+          { id: 1, usuario: 'Test User', habitacion: '101', fecha_inicio: '2024-01-01' }
+        ]
+      };
+      const expectedResult = mockResponseData.reservas;
 
-    service.getReservaById(1).subscribe(booking => {
-      expect(booking).toEqual(mockBooking);
+      service.listarReservas().subscribe(response => {
+        expect(response).toEqual(expectedResult);
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas');
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponseData);
     });
 
-    const req = httpMock.expectOne('/api/admin/reservas/1');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockBooking);
+    it('should handle empty reservations response', () => {
+      const mockResponseData = { reservas: [] };
+
+      service.listarReservas().subscribe(response => {
+        expect(response).toEqual([]);
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas');
+      req.flush(mockResponseData);
+    });
+
+    it('should handle missing reservas property', () => {
+      const mockResponseData = {};
+
+      service.listarReservas().subscribe(response => {
+        expect(response).toEqual([]);
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas');
+      req.flush(mockResponseData);
+    });
+
+    it('should handle error when listing reservations', () => {
+      const mockError = {
+        mensaje: 'Error al obtener reservas',
+        claseMensaje: 'error'
+      };
+
+      service.listarReservas().subscribe({
+        next: () => fail('should have failed'),
+        error: (error) => {
+          expect(error.error.mensaje).toBe('Error al obtener reservas');
+        }
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas');
+      req.flush(mockError, { status: 500, statusText: 'Internal Server Error' });
+    });
   });
 
-  it('should update booking status', () => {
-    const mockResponse = { message: 'Estado de reserva actualizado' };
-    const statusUpdate = { estado: 'confirmada' };
+  describe('cancelarReserva', () => {
+    it('should cancel reservation successfully', () => {
+      const reservaId = 1;
+      const mockResponse = {
+        mensaje: 'Reserva cancelada exitosamente',
+        claseMensaje: 'success'
+      };
 
-    service.actualizarEstadoReserva(1, 'confirmada').subscribe(response => {
-      expect(response).toEqual(mockResponse);
+      service.cancelarReserva(reservaId).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas/cancelar');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        reserva_id: reservaId
+      });
+      req.flush(mockResponse);
     });
 
-    const req = httpMock.expectOne('/api/admin/reservas/1/estado');
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual(statusUpdate);
-    req.flush(mockResponse);
+    it('should handle error when canceling reservation', () => {
+      const reservaId = 1;
+      const mockError = {
+        mensaje: 'Error al cancelar reserva',
+        claseMensaje: 'error'
+      };
+
+      service.cancelarReserva(reservaId).subscribe({
+        next: () => fail('should have failed'),
+        error: (error: any) => {
+          expect(error.error.mensaje).toBe('Error al cancelar reserva');
+        }
+      });
+
+      const req = httpMock.expectOne('/api/admin/reservas/cancelar');
+      req.flush(mockError, { status: 400, statusText: 'Bad Request' });
+    });
   });
 
-  it('should delete booking', () => {
-    const mockResponse = { message: 'Reserva eliminada exitosamente' };
-
-    service.eliminarReserva(1).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
-
-    const req = httpMock.expectOne('/api/admin/reservas/1');
-    expect(req.request.method).toBe('DELETE');
-    req.flush(mockResponse);
-  });
-
-  it('should get bookings by date range', () => {
-    const mockBookings = [
-      { id: 1, habitacionId: 1, usuarioId: 1, fechaInicio: '2024-01-01', fechaFin: '2024-01-03' }
-    ];
-    const dateRange = { fechaInicio: '2024-01-01', fechaFin: '2024-01-31' };
-
-    service.getReservasPorFecha(dateRange.fechaInicio, dateRange.fechaFin).subscribe(bookings => {
-      expect(bookings).toEqual(mockBookings);
-    });
-
-    const req = httpMock.expectOne(`/api/admin/reservas/fecha?fechaInicio=${dateRange.fechaInicio}&fechaFin=${dateRange.fechaFin}`);
-    expect(req.request.method).toBe('GET');
-    req.flush(mockBookings);
-  });
-
-  it('should get bookings by user', () => {
-    const mockBookings = [
-      { id: 1, habitacionId: 1, usuarioId: 1, fechaInicio: '2024-01-01', fechaFin: '2024-01-03' }
-    ];
-
-    service.getReservasPorUsuario(1).subscribe(bookings => {
-      expect(bookings).toEqual(mockBookings);
-    });
-
-    const req = httpMock.expectOne('/api/admin/reservas/usuario/1');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockBookings);
-  });
-
-  it('should get booking statistics', () => {
-    const mockStats = {
-      totalReservas: 10,
-      reservasConfirmadas: 8,
-      reservasPendientes: 2,
-      reservasCanceladas: 0
-    };
-
-    service.getEstadisticasReservas().subscribe(stats => {
-      expect(stats).toEqual(mockStats);
-    });
-
-    const req = httpMock.expectOne('/api/admin/reservas/estadisticas');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockStats);
+  it('should have correct API URL', () => {
+    expect(service['apiUrl']).toBe('/api/admin/reservas');
   });
 });

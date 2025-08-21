@@ -18,7 +18,12 @@ export class AuthService {
     // Al iniciar el servicio, intentamos cargar el usuario de localStorage si existe
     const usuarioStr = localStorage.getItem('usuario');
     if (usuarioStr) {
-      this.usuarioSubject.next(JSON.parse(usuarioStr));
+      try {
+        this.usuarioSubject.next(JSON.parse(usuarioStr));
+      } catch (error) {
+        // Si hay error al parsear, ignoramos y mantenemos null
+        console.warn('Error parsing user data from localStorage:', error);
+      }
     }
   }
 

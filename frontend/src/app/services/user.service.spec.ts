@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { UserService } from './user.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { UserService } from './user.service';
 
 describe('UserService', () => {
   let service: UserService;
   let httpMock: HttpTestingController;
+  const API_BASE_URL = 'http://localhost:3000/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,113 +24,108 @@ describe('UserService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should get user profile', () => {
-    const mockUser = { id: 1, nombre: 'Test User', email: 'test@test.com', role: 'user' };
+  describe('registrar', () => {
+    it('should register user successfully', () => {
+      const mockUserData = {
+        nombre: 'Test User',
+        correo: 'test@test.com',
+        contraseña: 'password123',
+        confirm_contraseña: 'password123'
+      };
 
-    service.getUserProfile().subscribe(user => {
-      expect(user).toEqual(mockUser);
+      const mockResponse = {
+        mensaje: 'Usuario registrado exitosamente',
+        claseMensaje: 'success'
+      };
+
+      service.registrar(mockUserData).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${API_BASE_URL}/registro`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(mockUserData);
+      req.flush(mockResponse);
     });
 
-    const req = httpMock.expectOne('/api/usuarios/profile');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockUser);
+    it('should handle registration error', () => {
+      const mockUserData = {
+        nombre: 'Test User',
+        correo: 'test@test.com',
+        contraseña: 'password123',
+        confirm_contraseña: 'password123'
+      };
+
+      const mockError = {
+        mensaje: 'El correo ya está registrado',
+        claseMensaje: 'error'
+      };
+
+      service.registrar(mockUserData).subscribe({
+        next: () => fail('should have failed with error'),
+        error: (error) => {
+          expect(error.error.mensaje).toBe('El correo ya está registrado');
+        }
+      });
+
+      const req = httpMock.expectOne(`${API_BASE_URL}/registro`);
+      req.flush(mockError, { status: 400, statusText: 'Bad Request' });
+    });
   });
 
-  it('should update user profile', () => {
-    const mockUser = { nombre: 'Updated User', email: 'updated@test.com' };
-    const mockResponse = { message: 'Perfil actualizado exitosamente' };
+  describe('login', () => {
+    it('should login user successfully', () => {
+      const mockLoginData = {
+        correo: 'test@test.com',
+        contrasena: 'password123'
+      };
 
-    service.updateUserProfile(mockUser).subscribe(response => {
-      expect(response).toEqual(mockResponse);
+      const mockResponse = {
+        mensaje: 'Login exitoso',
+        claseMensaje: 'success',
+        usuario: {
+          id: '1',
+          correo: 'test@test.com',
+          nombre: 'Test User',
+          rol: 'usuario'
+        },
+        token: 'mock-token'
+      };
+
+      service.login(mockLoginData).subscribe(response => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${API_BASE_URL}/login`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(mockLoginData);
+      req.flush(mockResponse);
     });
 
-    const req = httpMock.expectOne('/api/usuarios/profile');
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual(mockUser);
-    req.flush(mockResponse);
+    it('should handle invalid credentials error', () => {
+      const mockLoginData = {
+        correo: 'test@test.com',
+        contrasena: 'wrongpassword'
+      };
+
+      const mockError = {
+        mensaje: 'Credenciales inválidas',
+        claseMensaje: 'error'
+      };
+
+      service.login(mockLoginData).subscribe({
+        next: () => fail('should have failed with invalid credentials'),
+        error: (error) => {
+          expect(error.error.mensaje).toBe('Credenciales inválidas');
+        }
+      });
+
+      const req = httpMock.expectOne(`${API_BASE_URL}/login`);
+      req.flush(mockError, { status: 401, statusText: 'Unauthorized' });
+    });
   });
 
-  it('should change password', () => {
-    const passwordData = { currentPassword: 'oldpass', newPassword: 'newpass' };
-    const mockResponse = { message: 'Contraseña cambiada exitosamente' };
-
-    service.changePassword(passwordData).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
-
-    const req = httpMock.expectOne('/api/usuarios/change-password');
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual(passwordData);
-    req.flush(mockResponse);
-  });
-
-  it('should get all users (admin only)', () => {
-    const mockUsers = [
-      { id: 1, nombre: 'User 1', email: 'user1@test.com', role: 'user' },
-      { id: 2, nombre: 'User 2', email: 'user2@test.com', role: 'admin' }
-    ];
-
-    service.getAllUsers().subscribe(users => {
-      expect(users).toEqual(mockUsers);
-    });
-
-    const req = httpMock.expectOne('/api/admin/usuarios');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockUsers);
-  });
-
-  it('should get user by ID (admin only)', () => {
-    const mockUser = { id: 1, nombre: 'Test User', email: 'test@test.com', role: 'user' };
-
-    service.getUserById(1).subscribe(user => {
-      expect(user).toEqual(mockUser);
-    });
-
-    const req = httpMock.expectOne('/api/admin/usuarios/1');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockUser);
-  });
-
-  it('should update user (admin only)', () => {
-    const mockUser = { id: 1, nombre: 'Updated User', email: 'updated@test.com', role: 'admin' };
-    const mockResponse = { message: 'Usuario actualizado exitosamente' };
-
-    service.updateUser(1, mockUser).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
-
-    const req = httpMock.expectOne('/api/admin/usuarios/1');
-    expect(req.request.method).toBe('PUT');
-    expect(req.request.body).toEqual(mockUser);
-    req.flush(mockResponse);
-  });
-
-  it('should delete user (admin only)', () => {
-    const mockResponse = { message: 'Usuario eliminado exitosamente' };
-
-    service.deleteUser(1).subscribe(response => {
-      expect(response).toEqual(mockResponse);
-    });
-
-    const req = httpMock.expectOne('/api/admin/usuarios/1');
-    expect(req.request.method).toBe('DELETE');
-    req.flush(mockResponse);
-  });
-
-  it('should get user statistics (admin only)', () => {
-    const mockStats = {
-      totalUsuarios: 10,
-      usuariosActivos: 8,
-      usuariosInactivos: 2,
-      nuevosUsuariosEsteMes: 3
-    };
-
-    service.getUserStatistics().subscribe(stats => {
-      expect(stats).toEqual(mockStats);
-    });
-
-    const req = httpMock.expectOne('/api/admin/usuarios/estadisticas');
-    expect(req.request.method).toBe('GET');
-    req.flush(mockStats);
+  it('should have correct API base URL', () => {
+    expect(service['apiUrl']).toBe(API_BASE_URL);
   });
 });

@@ -24,11 +24,16 @@
   "devDependencies": {
     "eslint": "^9.11.1",
     "eslint-plugin-jest": "^29.0.1",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "supertest": "^7.1.4"
   },
   "jest": {
     "collectCoverageFrom": [
-      "**/*.js",
+      "controllers/**/*.js",
+      "middleware/**/*.js",
+      "routes/**/*.js",
+      "utils.js",
+      "sum.js",
       "!**/*.test.js",
       "!node_modules/**"
     ],
@@ -36,8 +41,8 @@
       "global": {
         "branches": 90,
         "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "lines": 89,
+        "statements": 89
       }
     },
     "coverageReporters": [

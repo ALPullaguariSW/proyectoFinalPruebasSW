@@ -1,0 +1,26 @@
+databases:
+  - name: plataforma-reservas-db
+    databaseName: plataforma_reservas
+    user: plataforma_user
+    plan: free
+
+services:
+  - type: web
+    name: plataforma-reservas-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: plataforma-reservas-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
+    autoDeploy: false

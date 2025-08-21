@@ -7,7 +7,6 @@ describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(AuthService);
-    // Limpiar localStorage antes de cada test
     localStorage.clear();
   });
 
@@ -19,130 +18,123 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should login user and store in localStorage', () => {
-    const mockUser: Usuario = {
+  it('should initialize with null user', (done) => {
+    service.usuario$.subscribe(usuario => {
+      expect(usuario).toBeNull();
+      done();
+    });
+  });
+
+  it('should login user with token', (done) => {
+    const mockUsuario: Usuario = {
       id: '1',
       nombre: 'Test User',
       rol: 'usuario'
     };
     const mockToken = 'test-token';
 
-    service.login(mockUser, mockToken);
+    service.login(mockUsuario, mockToken);
 
-    const storedUser = JSON.parse(localStorage.getItem('usuario') || '{}');
-    const storedToken = localStorage.getItem('token');
-
-    expect(storedUser).toEqual(mockUser);
-    expect(storedToken).toBe(mockToken);
+    service.usuario$.subscribe(usuario => {
+      expect(usuario).toEqual(mockUsuario);
+      expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario));
+      expect(localStorage.getItem('token')).toBe(mockToken);
+      done();
+    });
   });
 
-  it('should login user without token', () => {
-    const mockUser: Usuario = {
+  it('should login user without token', (done) => {
+    const mockUsuario: Usuario = {
       id: '1',
       nombre: 'Test User',
       rol: 'usuario'
     };
 
-    service.login(mockUser);
+    service.login(mockUsuario);
 
-    const storedUser = JSON.parse(localStorage.getItem('usuario') || '{}');
-    const storedToken = localStorage.getItem('token');
-
-    expect(storedUser).toEqual(mockUser);
-    expect(storedToken).toBeNull();
+    service.usuario$.subscribe(usuario => {
+      expect(usuario).toEqual(mockUsuario);
+      expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario));
+      expect(localStorage.getItem('token')).toBeNull();
+      done();
+    });
   });
 
-  it('should logout user and clear localStorage', () => {
-    // Primero hacer login
-    const mockUser: Usuario = {
+  it('should logout user', (done) => {
+    const mockUsuario: Usuario = {
       id: '1',
       nombre: 'Test User',
       rol: 'usuario'
     };
-    service.login(mockUser, 'test-token');
-
-    // Luego hacer logout
+    
+    service.login(mockUsuario, 'test-token');
     service.logout();
 
-    expect(localStorage.getItem('usuario')).toBeNull();
-    expect(localStorage.getItem('token')).toBeNull();
+    service.usuario$.subscribe(usuario => {
+      expect(usuario).toBeNull();
+      expect(localStorage.getItem('usuario')).toBeNull();
+      expect(localStorage.getItem('token')).toBeNull();
+      done();
+    });
   });
 
-  it('should get current user', () => {
-    const mockUser: Usuario = {
+  it('should get current usuario', () => {
+    const mockUsuario: Usuario = {
       id: '1',
       nombre: 'Test User',
       rol: 'usuario'
     };
 
-    service.login(mockUser);
-    const currentUser = service.getUsuario();
-
-    expect(currentUser).toEqual(mockUser);
+    service.login(mockUsuario);
+    const currentUsuario = service.getUsuario();
+    
+    expect(currentUsuario).toEqual(mockUsuario);
   });
 
-  it('should get stored token', () => {
-    const mockToken = 'test-token';
-    localStorage.setItem('token', mockToken);
-
-    const token = service.getToken();
-
-    expect(token).toBe(mockToken);
+  it('should get current token', () => {
+    localStorage.setItem('token', 'test-token');
+    const currentToken = service.getToken();
+    expect(currentToken).toBe('test-token');
   });
 
-  it('should return null for non-existent token', () => {
-    const token = service.getToken();
+  it('should return null when no token exists', () => {
+    const currentToken = service.getToken();
+    expect(currentToken).toBeNull();
+  });
 
-    expect(token).toBeNull();
+  it('should return null when no user is logged in', () => {
+    const currentUsuario = service.getUsuario();
+    expect(currentUsuario).toBeNull();
   });
 
   it('should load user from localStorage on initialization', () => {
-    const mockUser: Usuario = {
+    const mockUsuario: Usuario = {
       id: '1',
       nombre: 'Test User',
       rol: 'usuario'
     };
-    localStorage.setItem('usuario', JSON.stringify(mockUser));
-
-    // Crear nueva instancia del servicio
-    const newService = TestBed.inject(AuthService);
-    const currentUser = newService.getUsuario();
-
-    expect(currentUser).toEqual(mockUser);
+    localStorage.setItem('usuario', JSON.stringify(mockUsuario));
+    
+    const newService = new AuthService();
+    const loadedUsuario = newService.getUsuario();
+    
+    expect(loadedUsuario).toEqual(mockUsuario);
   });
 
-  it('should emit user changes through observable', (done) => {
-    const mockUser: Usuario = {
-      id: '1',
-      nombre: 'Test User',
-      rol: 'usuario'
-    };
-
-    service.usuario$.subscribe(user => {
-      if (user) {
-        expect(user).toEqual(mockUser);
-        done();
-      }
-    });
-
-    service.login(mockUser);
+  it('should handle malformed localStorage data gracefully', () => {
+    localStorage.setItem('usuario', 'invalid-json');
+    
+    expect(() => {
+      new AuthService();
+    }).not.toThrow();
   });
 
-  it('should emit null on logout through observable', (done) => {
-    const mockUser: Usuario = {
-      id: '1',
-      nombre: 'Test User',
-      rol: 'usuario'
-    };
-
-    service.login(mockUser);
-
-    service.usuario$.subscribe(user => {
-      if (user === null) {
-        done();
-      }
-    });
-
-    service.logout();
+  it('should handle empty localStorage', () => {
+    localStorage.clear();
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
   });
 });

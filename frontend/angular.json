@@ -91,7 +91,6 @@
             ],
             "codeCoverage": true,
             "codeCoverageExclude": [
-              "src/test.ts",
               "src/**/*.module.ts",
               "src/**/*.array.ts",
               "src/**/*.constant.ts",

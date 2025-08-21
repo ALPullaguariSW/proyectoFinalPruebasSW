@@ -1,121 +1,38 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
-import { RouterTestingModule } from '@angular/router/testing';
-import { AuthService } from './services/auth.service';
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 
-describe('AppComponent', () => {
-  let component: AppComponent;
-  let fixture: ComponentFixture<AppComponent>;
-  let authService: jasmine.SpyObj<AuthService>;
-  let router: jasmine.SpyObj<Router>;
+describe('App', () => {
+  let component: App;
+  let router: Router;
 
-  beforeEach(async () => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['isLoggedIn', 'logout']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-
-    await TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      declarations: [AppComponent],
-      providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(AppComponent);
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [App, RouterTestingModule]
+    });
+    
+    const fixture = TestBed.createComponent(App);
     component = fixture.componentInstance;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    fixture.detectChanges();
+    router = TestBed.inject(Router);
   });
 
-  it('should create', () => {
+  it('should create the app', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have title', () => {
-    expect(component.title).toEqual('Plataforma de Reservas');
+  it('should have title property', () => {
+    expect(component['title']).toBeDefined();
   });
 
-  it('should check authentication status on init', () => {
-    authService.isLoggedIn.and.returnValue(true);
-    
-    component.ngOnInit();
-    
-    expect(authService.isLoggedIn).toHaveBeenCalled();
-    expect(component.isAuthenticated).toBe(true);
+  it('should have title method that returns the title', () => {
+    const title = component['title']();
+    expect(typeof title).toBe('string');
+    expect(title.length).toBeGreaterThan(0);
   });
 
-  it('should update authentication status when not logged in', () => {
-    authService.isLoggedIn.and.returnValue(false);
-    
-    component.ngOnInit();
-    
-    expect(component.isAuthenticated).toBe(false);
-  });
-
-  it('should logout and redirect to login', () => {
-    component.logout();
-    
-    expect(authService.logout).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
-  });
-
-  it('should navigate to dashboard', () => {
-    component.irADashboard();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
-  });
-
-  it('should navigate to booking', () => {
-    component.irAReservar();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/booking']);
-  });
-
-  it('should navigate to my bookings', () => {
-    component.irAMisReservas();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/mis-reservas']);
-  });
-
-  it('should navigate to admin dashboard if user is admin', () => {
-    component.irAAdmin();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/admin']);
-  });
-
-  it('should navigate to login', () => {
-    component.irALogin();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
-  });
-
-  it('should navigate to register', () => {
-    component.irARegistro();
-    
-    expect(router.navigate).toHaveBeenCalledWith(['/register']);
-  });
-
-  it('should toggle mobile menu', () => {
-    expect(component.mobileMenuOpen).toBe(false);
-    
-    component.toggleMobileMenu();
-    
-    expect(component.mobileMenuOpen).toBe(true);
-    
-    component.toggleMobileMenu();
-    
-    expect(component.mobileMenuOpen).toBe(false);
-  });
-
-  it('should close mobile menu', () => {
-    component.mobileMenuOpen = true;
-    
-    component.closeMobileMenu();
-    
-    expect(component.mobileMenuOpen).toBe(false);
+  it('should render without errors', () => {
+    const fixture = TestBed.createComponent(App);
+    expect(() => fixture.detectChanges()).not.toThrow();
   });
 });
