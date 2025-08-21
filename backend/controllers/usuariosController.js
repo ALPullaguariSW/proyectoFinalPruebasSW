@@ -109,19 +109,24 @@ exports.reservarHabitacion = async (req, res) => {
   // Consultar disponibilidad
   if (accion === 'consultar') {
     try {
-             let sql = `SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
-         NOT EXISTS (
-           SELECT 1 FROM reservas r
-           WHERE r.habitacion_id = h.id
-           AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
-         ) AS disponible
-         FROM habitaciones h`;
-       const params = [fecha_inicio, fecha_fin];
-       if (tipo_habitacion) {
-         sql += ' WHERE h.tipo = $3';
-         params.push(tipo_habitacion);
-       }
-      sql += ' ORDER BY h.tipo, h.precio, h.numero';
+      let sql = `
+        SELECT h.id, h.numero, h.estado,
+          th.nombre as tipo, th.descripcion, th.precio, th.capacidad,
+          NOT EXISTS (
+            SELECT 1 FROM reservas r
+            WHERE r.habitacion_id = h.id
+            AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
+          ) AS disponible
+        FROM habitaciones h
+        JOIN tipos_habitacion th ON h.tipo_id = th.id`;
+      
+      const params = [fecha_inicio, fecha_fin];
+      if (tipo_habitacion) {
+        sql += ' WHERE th.nombre = $3';
+        params.push(tipo_habitacion);
+      }
+      sql += ' ORDER BY th.nombre, th.precio, h.numero';
+      
       const { rows: habitaciones } = await pool.query(sql, params);
       return res.json({ habitaciones });
     } catch (error) {
@@ -180,15 +185,16 @@ exports.misReservas = async (req, res) => {
     return res.status(400).json({ mensaje: 'Falta el ID de usuario.', claseMensaje: 'error' });
   }
   try {
-          const { rows: reservas } = await pool.query(
-        `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.created_at,
-          h.tipo AS habitacion_tipo, h.numero AS habitacion_numero, h.precio AS habitacion_precio
-        FROM reservas r
-        JOIN habitaciones h ON r.habitacion_id = h.id
-        WHERE r.usuario_id = $1
-        ORDER BY r.fecha_inicio DESC`,
-        [usuario_id]
-      );
+    const { rows: reservas } = await pool.query(
+      `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.created_at,
+        th.nombre AS habitacion_tipo, h.numero AS habitacion_numero, th.precio AS habitacion_precio
+      FROM reservas r
+      JOIN habitaciones h ON r.habitacion_id = h.id
+      JOIN tipos_habitacion th ON h.tipo_id = th.id
+      WHERE r.usuario_id = $1
+      ORDER BY r.fecha_inicio DESC`,
+      [usuario_id]
+    );
     return res.json({ reservas });
   } catch (error) {
     return res.status(500).json({ mensaje: 'Error al obtener las reservas. Intente más tarde.', claseMensaje: 'error' });
@@ -216,20 +222,21 @@ exports.obtenerHabitacionesDisponibles = async (req, res) => {
   }
 
   try {
-         const sql = `
-       SELECT h.id, h.tipo, h.numero, h.capacidad, h.precio,
-         NOT EXISTS (
-           SELECT 1 FROM reservas r
-           WHERE r.habitacion_id = h.id
-             AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
-         ) AS disponible
-       FROM habitaciones h
-       WHERE ($3 IS NULL OR h.tipo = $4)
-       ORDER BY h.tipo, h.precio, h.numero
-     `;
+    const sql = `
+      SELECT h.id, h.numero, h.estado,
+        th.nombre as tipo, th.descripcion, th.precio, th.capacidad,
+        NOT EXISTS (
+          SELECT 1 FROM reservas r
+          WHERE r.habitacion_id = h.id
+            AND NOT (r.fecha_fin <= $1 OR r.fecha_inicio >= $2)
+        ) AS disponible
+      FROM habitaciones h
+      JOIN tipos_habitacion th ON h.tipo_id = th.id
+      WHERE ($3 IS NULL OR th.nombre = $3)
+      ORDER BY th.nombre, th.precio, h.numero
+    `;
 
-     const params = [fecha_inicio, fecha_fin, tipo_habitacion || null, tipo_habitacion || null];
-
+    const params = [fecha_inicio, fecha_fin, tipo_habitacion || null];
     const { rows: habitaciones } = await pool.query(sql, params);
 
     return res.json({ habitaciones });

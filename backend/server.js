@@ -20,11 +20,6 @@ app.use((req, res, next) => {
 // Conexión a la base de datos
 const pool = require('./config/db');
 
-// Ruta básica de prueba (opcional)
-app.get('/', (req, res) => {
-  res.send('✅ Servidor funcionando y base de datos conectada');
-});
-
 // Importar rutas de usuario
 const usuariosRoutes = require('./routes/usuarios');
 app.use('/api', usuariosRoutes);

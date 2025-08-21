@@ -137,4 +137,123 @@ describe('AuthService', () => {
     
     expect(usuario).toBeNull();
   });
+
+  it('should handle localStorage with null usuario', () => {
+    localStorage.setItem('usuario', 'null');
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
+  });
+
+  it('should handle localStorage with undefined usuario', () => {
+    localStorage.setItem('usuario', 'undefined');
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
+  });
+
+  it('should handle localStorage with empty string usuario', () => {
+    localStorage.setItem('usuario', '');
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
+  });
+
+  it('should handle localStorage with valid string but invalid JSON', () => {
+    localStorage.setItem('usuario', 'not-a-json-string');
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
+  });
+
+  it('should handle localStorage with null usuario from getItem', () => {
+    // Simular que localStorage.getItem devuelve null
+    spyOn(localStorage, 'getItem').and.returnValue(null);
+    
+    const newService = new AuthService();
+    const usuario = newService.getUsuario();
+    
+    expect(usuario).toBeNull();
+  });
+
+  it('should handle login with undefined token', () => {
+    const mockUsuario: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.login(mockUsuario, undefined);
+
+    expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario));
+    expect(localStorage.getItem('token')).toBeNull();
+  });
+
+  it('should handle login with token', () => {
+    const mockUsuario: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+    const mockToken = 'test-token-123';
+
+    service.login(mockUsuario, mockToken);
+
+    expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario));
+    expect(localStorage.getItem('token')).toBe(mockToken);
+  });
+
+  it('should handle login without token', () => {
+    const mockUsuario: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.login(mockUsuario);
+
+    expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario));
+    expect(localStorage.getItem('token')).toBeNull();
+  });
+
+  it('should handle multiple login calls', () => {
+    const mockUsuario1: Usuario = {
+      id: '1',
+      nombre: 'User 1',
+      rol: 'usuario'
+    };
+    const mockUsuario2: Usuario = {
+      id: '2',
+      nombre: 'User 2',
+      rol: 'admin'
+    };
+
+    service.login(mockUsuario1);
+    service.login(mockUsuario2);
+
+    expect(localStorage.getItem('usuario')).toBe(JSON.stringify(mockUsuario2));
+  });
+
+  it('should handle logout after multiple logins', () => {
+    const mockUsuario: Usuario = {
+      id: '1',
+      nombre: 'Test User',
+      rol: 'usuario'
+    };
+
+    service.login(mockUsuario, 'token1');
+    service.login(mockUsuario, 'token2');
+    service.logout();
+
+    expect(localStorage.getItem('usuario')).toBeNull();
+    expect(localStorage.getItem('token')).toBeNull();
+  });
 });

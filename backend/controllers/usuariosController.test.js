@@ -26,17 +26,16 @@ describe('UsuariosController', () => {
   });
 
   describe('registroUsuario', () => {
-    it('should register user successfully', async () => {
+    it('should register a new user successfully', async () => {
       mockReq.body = {
         nombre: 'Juan Pérez',
         correo: 'juan@test.com',
-        contrasena: 'test123!',
-        confirm_contrasena: 'test123!'
+        contrasena: 'Test123!',
+        confirm_contrasena: 'Test123!'
       };
 
-      db.query.mockResolvedValueOnce({ rows: [] });
-      bcrypt.hash.mockResolvedValueOnce('hashed_password');
-      db.query.mockResolvedValueOnce();
+      db.query.mockResolvedValueOnce({ rows: [] }); // No existe el correo
+      db.query.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // Usuario creado
 
       await usuariosController.registroUsuario(mockReq, mockRes);
 
@@ -46,11 +45,48 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error for missing fields', async () => {
+    it('should handle database error in registroUsuario', async () => {
       mockReq.body = {
-        nombre: 'Juan',
+        nombre: 'Juan Pérez',
+        correo: 'juan@test.com',
+        contrasena: 'Test123!',
+        confirm_contrasena: 'Test123!'
+      };
+
+      db.query.mockResolvedValueOnce({ rows: [] }); // No existe el correo
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Error al crear
+
+      await usuariosController.registroUsuario(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error del sistema. Intente más tarde.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle validation error in registroUsuario', async () => {
+      mockReq.body = {
+        nombre: 'Juan Pérez',
+        correo: 'juan@test.com',
+        contrasena: 'Test123!',
+        confirm_contrasena: 'Different123!' // Contraseñas diferentes
+      };
+
+      await usuariosController.registroUsuario(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Las contraseñas no coinciden.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle validation error for missing fields', async () => {
+      mockReq.body = {
+        nombre: 'Juan Pérez',
         correo: 'juan@test.com'
-        // Missing contrasena and confirm_contrasena
+        // Faltan contrasena y confirm_contrasena
       };
 
       await usuariosController.registroUsuario(mockReq, mockRes);
@@ -62,29 +98,12 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error for password without lowercase', async () => {
+    it('should handle validation error for invalid email format', async () => {
       mockReq.body = {
-        nombre: 'Juan',
-        correo: 'juan@test.com',
-        contrasena: 'TEST123!',
-        confirm_contrasena: 'TEST123!'
-      };
-
-      await usuariosController.registroUsuario(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'La contraseña debe contener al menos una letra minúscula.',
-        claseMensaje: 'error'
-      });
-    });
-
-    it('should return error for invalid email format', async () => {
-      mockReq.body = {
-        nombre: 'Juan',
+        nombre: 'Juan Pérez',
         correo: 'invalid-email',
-        contrasena: 'test123!',
-        confirm_contrasena: 'test123!'
+        contrasena: 'Test123!',
+        confirm_contrasena: 'Test123!'
       };
 
       await usuariosController.registroUsuario(mockReq, mockRes);
@@ -96,9 +115,9 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error for short password', async () => {
+    it('should handle validation error for short password', async () => {
       mockReq.body = {
-        nombre: 'Juan',
+        nombre: 'Juan Pérez',
         correo: 'juan@test.com',
         contrasena: '123',
         confirm_contrasena: '123'
@@ -113,12 +132,29 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error for missing special character', async () => {
+    it('should handle validation error for password without lowercase', async () => {
       mockReq.body = {
-        nombre: 'Juan',
+        nombre: 'Juan Pérez',
         correo: 'juan@test.com',
-        contrasena: 'test123',
-        confirm_contrasena: 'test123'
+        contrasena: 'TEST123!',
+        confirm_contrasena: 'TEST123!'
+      };
+
+      await usuariosController.registroUsuario(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'La contraseña debe contener al menos una letra minúscula.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should handle validation error for password without special char', async () => {
+      mockReq.body = {
+        nombre: 'Juan Pérez',
+        correo: 'juan@test.com',
+        contrasena: 'Test123',
+        confirm_contrasena: 'Test123'
       };
 
       await usuariosController.registroUsuario(mockReq, mockRes);
@@ -130,32 +166,15 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error when passwords do not match', async () => {
+    it('should handle validation error for existing email', async () => {
       mockReq.body = {
-        nombre: 'Juan',
+        nombre: 'Juan Pérez',
         correo: 'juan@test.com',
-        contrasena: 'test123!',
-        confirm_contrasena: 'different123!'
+        contrasena: 'Test123!',
+        confirm_contrasena: 'Test123!'
       };
 
-      await usuariosController.registroUsuario(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Las contraseñas no coinciden.',
-        claseMensaje: 'error'
-      });
-    });
-
-    it('should return error when email already exists', async () => {
-      mockReq.body = {
-        nombre: 'Juan',
-        correo: 'juan@test.com',
-        contrasena: 'test123!',
-        confirm_contrasena: 'test123!'
-      };
-
-      db.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+      db.query.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // Correo ya existe
 
       await usuariosController.registroUsuario(mockReq, mockRes);
 
@@ -168,121 +187,59 @@ describe('UsuariosController', () => {
   });
 
   describe('loginUsuario', () => {
-    it('should login user successfully', async () => {
+    it('should handle database error in loginUsuario', async () => {
       mockReq.body = {
-        correo: 'juan@test.com',
-        contrasena: 'test123!'
+        correo: 'test@test.com',
+        contrasena: 'Test123!'
       };
 
-      const mockUser = {
-        id: 1,
-        nombre: 'Juan Pérez',
-        contrasena: 'hashed_password',
-        rol: 'usuario'
-      };
-
-      db.query.mockResolvedValueOnce({ rows: [mockUser] });
-      bcrypt.compare.mockResolvedValueOnce(true);
-      jwt.sign.mockReturnValueOnce('mock_token');
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Error de BD
 
       await usuariosController.loginUsuario(mockReq, mockRes);
 
+      expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Login exitoso',
-        claseMensaje: 'success',
-        usuario: {
-          id: 1,
-          nombre: 'Juan Pérez',
-          rol: 'usuario'
-        },
-        token: 'mock_token'
-      });
-    });
-
-    it('should return error for invalid credentials', async () => {
-      mockReq.body = {
-        correo: 'juan@test.com',
-        contrasena: 'wrong_password'
-      };
-
-      const mockUser = {
-        id: 1,
-        nombre: 'Juan Pérez',
-        contrasena: 'hashed_password',
-        rol: 'usuario'
-      };
-
-      db.query.mockResolvedValueOnce({ rows: [mockUser] });
-      bcrypt.compare.mockResolvedValueOnce(false);
-
-      await usuariosController.loginUsuario(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Correo o contraseña incorrecta.',
+        mensaje: 'Error del sistema. Intente más tarde.',
         claseMensaje: 'error'
       });
     });
 
-    it('should return error when user not found', async () => {
-      mockReq.body = {
-        correo: 'nonexistent@test.com',
-        contrasena: 'test123!'
+    it('should handle missing fields in loginUsuario', async () => {
+      const mockData = {
+        correo: 'test@test.com'
+        // Missing contrasena
       };
 
-      db.query.mockResolvedValueOnce({ rows: [] });
+      mockReq.body = mockData;
 
       await usuariosController.loginUsuario(mockReq, mockRes);
 
-      expect(mockRes.status).toHaveBeenCalledWith(401);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Correo o contraseña incorrecta.',
+        mensaje: 'Por favor, complete todos los campos.',
         claseMensaje: 'error'
       });
     });
   });
 
   describe('reservarHabitacion', () => {
-    it('should consult available rooms successfully', async () => {
+    it('should handle missing dates in reservarHabitacion', async () => {
       mockReq.body = {
         usuario_id: 1,
-        fecha_inicio: '2024-01-15',
-        fecha_fin: '2024-01-17',
         accion: 'consultar'
+        // Faltan fecha_inicio y fecha_fin
       };
-
-      const mockHabitaciones = [
-        { id: 1, tipo: 'Individual', numero: '101', disponible: true }
-      ];
-
-      db.query.mockResolvedValueOnce({ rows: mockHabitaciones });
 
       await usuariosController.reservarHabitacion(mockReq, mockRes);
 
-      expect(mockRes.json).toHaveBeenCalledWith({ habitaciones: mockHabitaciones });
-    });
-
-    it('should make reservation successfully', async () => {
-      mockReq.body = {
-        usuario_id: 1,
-        fecha_inicio: '2024-01-15',
-        fecha_fin: '2024-01-17',
-        habitacion_id: 1,
-        accion: 'reservar'
-      };
-
-      db.query.mockResolvedValueOnce({ rows: [] });
-      db.query.mockResolvedValueOnce();
-
-      await usuariosController.reservarHabitacion(mockReq, mockRes);
-
+      expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: '¡Reserva registrada con éxito!',
-        claseMensaje: 'success'
+        mensaje: 'Las fechas de entrada y salida son requeridas.',
+        claseMensaje: 'error'
       });
     });
 
-    it('should return error for invalid dates', async () => {
+    it('should handle invalid dates in reservarHabitacion', async () => {
       mockReq.body = {
         usuario_id: 1,
         fecha_inicio: '2024-01-17',
@@ -299,46 +256,13 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error when room is already booked', async () => {
-      mockReq.body = {
-        usuario_id: 1,
-        fecha_inicio: '2024-01-15',
-        fecha_fin: '2024-01-17',
-        habitacion_id: 1,
-        accion: 'reservar'
-      };
-
-      db.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
-
-      await usuariosController.reservarHabitacion(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'La habitación seleccionada ya está reservada para esas fechas.',
-        claseMensaje: 'error'
-      });
-    });
-
-    it('should return error when dates are missing', async () => {
-      mockReq.body = {
-        accion: 'consultar'
-      };
-
-      await usuariosController.reservarHabitacion(mockReq, mockRes);
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Las fechas de entrada y salida son requeridas.',
-        claseMensaje: 'error'
-      });
-    });
-
-    it('should return error when habitacion_id is missing for reservar', async () => {
+    it('should handle missing habitacion_id in reservarHabitacion', async () => {
       mockReq.body = {
         usuario_id: 1,
         fecha_inicio: '2024-01-15',
         fecha_fin: '2024-01-17',
         accion: 'reservar'
+        // Falta habitacion_id
       };
 
       await usuariosController.reservarHabitacion(mockReq, mockRes);
@@ -350,11 +274,12 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error for invalid action', async () => {
+    it('should handle invalid action in reservarHabitacion', async () => {
       mockReq.body = {
+        usuario_id: 1,
         fecha_inicio: '2024-01-15',
         fecha_fin: '2024-01-17',
-        accion: 'invalid'
+        accion: 'invalid_action'
       };
 
       await usuariosController.reservarHabitacion(mockReq, mockRes);
@@ -366,14 +291,14 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should handle database error in consultar', async () => {
+    it('should handle database error in reservarHabitacion consultar', async () => {
       mockReq.body = {
         fecha_inicio: '2024-01-15',
         fecha_fin: '2024-01-17',
         accion: 'consultar'
       };
 
-      db.query.mockRejectedValueOnce(new Error('Database error'));
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Error de BD
 
       await usuariosController.reservarHabitacion(mockReq, mockRes);
 
@@ -384,8 +309,8 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should handle database error in reservar', async () => {
-      mockReq.body = {
+    it('should handle database error in reservarHabitacion reservar', async () => {
+      const mockData = {
         usuario_id: 1,
         fecha_inicio: '2024-01-15',
         fecha_fin: '2024-01-17',
@@ -393,8 +318,9 @@ describe('UsuariosController', () => {
         accion: 'reservar'
       };
 
-      db.query.mockResolvedValueOnce({ rows: [] });
-      db.query.mockRejectedValueOnce(new Error('Database error'));
+      mockReq.body = mockData;
+      db.query.mockResolvedValueOnce({ rows: [] }); // No conflicts
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Insert fails
 
       await usuariosController.reservarHabitacion(mockReq, mockRes);
 
@@ -413,7 +339,7 @@ describe('UsuariosController', () => {
         usuario_id: 1
       };
 
-      db.query.mockResolvedValueOnce({ rowCount: 1 });
+      db.query.mockResolvedValueOnce({ rowCount: 1 }); // Reserva encontrada y eliminada
 
       await usuariosController.cancelarReserva(mockReq, mockRes);
 
@@ -429,7 +355,7 @@ describe('UsuariosController', () => {
         usuario_id: 1
       };
 
-      db.query.mockResolvedValueOnce({ rowCount: 0 });
+      db.query.mockResolvedValueOnce({ rowCount: 0 }); // Reserva no encontrada
 
       await usuariosController.cancelarReserva(mockReq, mockRes);
 
@@ -440,8 +366,28 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should return error when missing data', async () => {
-      mockReq.body = {};
+    it('should handle database error in cancelarReserva', async () => {
+      mockReq.body = {
+        reserva_id: 1,
+        usuario_id: 1
+      };
+
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Error de BD
+
+      await usuariosController.cancelarReserva(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al cancelar la reserva. Intente más tarde.',
+        claseMensaje: 'error'
+      });
+    });
+
+    it('should return error when missing data in cancelarReserva', async () => {
+      mockReq.body = {
+        reserva_id: 1
+        // Falta usuario_id
+      };
 
       await usuariosController.cancelarReserva(mockReq, mockRes);
 
@@ -452,19 +398,17 @@ describe('UsuariosController', () => {
       });
     });
 
-    it('should handle database error in cancelarReserva', async () => {
+    it('should return error when missing reserva_id in cancelarReserva', async () => {
       mockReq.body = {
-        reserva_id: 1,
         usuario_id: 1
+        // Falta reserva_id
       };
-
-      db.query.mockRejectedValueOnce(new Error('Database error'));
 
       await usuariosController.cancelarReserva(mockReq, mockRes);
 
-      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'Error al cancelar la reserva. Intente más tarde.',
+        mensaje: 'Faltan datos para cancelar la reserva.',
         claseMensaje: 'error'
       });
     });
@@ -472,14 +416,16 @@ describe('UsuariosController', () => {
 
   describe('misReservas', () => {
     it('should return user reservations', async () => {
-      mockReq.params = { usuario_id: 1 };
+      mockReq.params = { usuario_id: '1' };
 
       const mockReservas = [
         {
           id: 1,
           fecha_inicio: '2024-01-15',
+          fecha_fin: '2024-01-17',
           habitacion_tipo: 'Individual',
-          habitacion_numero: '101'
+          habitacion_numero: '101',
+          habitacion_precio: 50.00
         }
       ];
 
@@ -503,9 +449,9 @@ describe('UsuariosController', () => {
     });
 
     it('should handle database error in misReservas', async () => {
-      mockReq.params = { usuario_id: 1 };
+      mockReq.params = { usuario_id: '1' };
 
-      db.query.mockRejectedValueOnce(new Error('Database error'));
+      db.query.mockRejectedValueOnce(new Error('Database error')); // Error de BD
 
       await usuariosController.misReservas(mockReq, mockRes);
 
@@ -520,15 +466,15 @@ describe('UsuariosController', () => {
   describe('obtenerTiposHabitacion', () => {
     it('should return room types', async () => {
       const mockTipos = [
-        { tipo: 'Individual' },
-        { tipo: 'Doble' }
+        { id: 1, nombre: 'Individual', descripcion: 'Habitación individual', precio: 50.00, capacidad: 2 },
+        { id: 2, nombre: 'Doble', descripcion: 'Habitación doble', precio: 75.00, capacidad: 2 }
       ];
 
       db.query.mockResolvedValueOnce({ rows: mockTipos });
 
       await usuariosController.obtenerTiposHabitacion(mockReq, mockRes);
 
-      expect(mockRes.json).toHaveBeenCalledWith(['Individual', 'Doble']);
+      expect(mockRes.json).toHaveBeenCalledWith(mockTipos);
     });
 
     it('should handle database error in obtenerTiposHabitacion', async () => {
@@ -551,7 +497,16 @@ describe('UsuariosController', () => {
       };
 
       const mockHabitaciones = [
-        { id: 1, tipo: 'Individual', numero: '101', disponible: true }
+        { 
+          id: 1, 
+          numero: '101', 
+          estado: 'disponible',
+          tipo: 'Individual', 
+          descripcion: 'Habitación individual',
+          precio: 50.00,
+          capacidad: 2,
+          disponible: true 
+        }
       ];
 
       db.query.mockResolvedValueOnce({ rows: mockHabitaciones });

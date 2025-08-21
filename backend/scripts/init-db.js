@@ -1,6 +1,16 @@
 const fs = require('fs');
 const path = require('path');
-const pool = require('../config/db');
+const { Pool } = require('pg');
+
+// Crear un pool temporal para la inicialización
+const tempPool = new Pool({
+  connectionString: process.env.DATABASE_URL || 
+    `postgresql://${process.env.POSTGRES_USER || 'reservas_db_knfd_user'}:${process.env.POSTGRES_PASSWORD || 'fPLvTe9gRVqQuhUSgcQmv7ehmNfDMqRk'}@${process.env.POSTGRES_HOST || 'dpg-d2j4m5gdl3ps738nulb0-a.oregon-postgres.render.com'}:${process.env.POSTGRES_PORT || 5432}/${process.env.POSTGRES_DB || 'reservas_db_knfd'}`,
+  ssl: {
+    rejectUnauthorized: false,
+    sslmode: 'require'
+  }
+});
 
 async function initializeDatabase() {
   try {
@@ -18,7 +28,7 @@ async function initializeDatabase() {
     const initSql = fs.readFileSync(initSqlPath, 'utf8');
     
     // Ejecutar el script SQL
-    await pool.query(initSql);
+    await tempPool.query(initSql);
     
     console.log('✅ Base de datos inicializada correctamente');
     
@@ -34,7 +44,8 @@ async function initializeDatabase() {
       throw fallbackError;
     }
   } finally {
-    await pool.end();
+    // Cerrar solo el pool temporal
+    await tempPool.end();
   }
 }
 
@@ -94,7 +105,7 @@ async function createBasicSchema() {
     ON CONFLICT DO NOTHING;
   `;
   
-  await pool.query(basicSchema);
+  await tempPool.query(basicSchema);
   console.log('✅ Esquema básico creado correctamente');
 }
 
