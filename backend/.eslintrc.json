@@ -1,13 +1,16 @@
 {
 	"env": {
 		"es2022": true,
-		"node": true,
-		"jest": true
+		"node": true
 	},
-	"extends": ["eslint:recommended"],
-	"parserOptions": {
-		"ecmaVersion": "latest",
+	"languageOptions": {
+		"ecmaVersion": 2022,
 		"sourceType": "script"
+	},
+	"extends": ["eslint:recommended", "plugin:jest/recommended"],
+	"plugins": ["jest"],
+	"globals": {
+		"jest": "readonly"
 	},
 	"rules": {
 		"semi": ["error", "always"],
@@ -15,5 +18,6 @@
 		"no-unused-vars": ["warn"],
 		"no-undef": ["error"],
 		"no-console": "off"
-	}
+	},
+
 }

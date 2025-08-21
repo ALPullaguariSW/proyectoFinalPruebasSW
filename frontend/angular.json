@@ -29,7 +29,7 @@
               "src/styles.css"
             ],
             "outputPath": "dist",
-            "baseHref": "/Plataforma_reservas_A/"
+            "baseHref": "/proyectoFinalPruebasSW/"
           },
           "configurations": {
             "production": {
@@ -46,7 +46,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/Plataforma_reservas_A/"
+              "baseHref": "/proyectoFinalPruebasSW/"
             },
             "development": {
               "optimization": false,
