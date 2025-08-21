@@ -5,6 +5,7 @@ import { UserService } from './user.service';
 describe('UserService', () => {
   let service: UserService;
   let httpMock: HttpTestingController;
+  // Para CI/CD y producción, usar Render
   const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com/api';
 
   beforeEach(() => {

@@ -5,6 +5,7 @@ import { BookingService } from './booking.service';
 describe('BookingService', () => {
   let service: BookingService;
   let httpMock: HttpTestingController;
+  // Para CI/CD y producción, usar Render
   const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com';
 
   beforeEach(() => {

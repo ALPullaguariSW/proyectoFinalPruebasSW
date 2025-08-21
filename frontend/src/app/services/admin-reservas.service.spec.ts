@@ -5,6 +5,7 @@ import { AdminReservasService } from './admin-reservas.service';
 describe('AdminReservasService', () => {
   let service: AdminReservasService;
   let httpMock: HttpTestingController;
+  // Para CI/CD y producción, usar Render
   const API_BASE_URL = 'https://proyectofinalpruebassw.onrender.com/api';
 
   beforeEach(() => {
