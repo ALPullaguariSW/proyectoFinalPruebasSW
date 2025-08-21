@@ -13,7 +13,7 @@ app.use(express.json());
 // Middleware de logging para debugging
 app.use((req, res, next) => {
   console.log(`🔍 ${req.method} ${req.path} - Body:`, req.body);
-  console.log(`🔍 Headers:`, req.headers);
+  console.log('🔍 Headers:', req.headers);
   next();
 });
 
