@@ -29,7 +29,7 @@
               "src/styles.css"
             ],
             "outputPath": "dist",
-            "baseHref": "/proyectoFinalPruebasSW/"
+            "baseHref": "/"
           },
           "configurations": {
             "production": {
@@ -46,7 +46,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/proyectoFinalPruebasSW/"
+              "baseHref": "/"
             },
             "development": {
               "optimization": false,
