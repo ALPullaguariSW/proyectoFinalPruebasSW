@@ -42,7 +42,7 @@ jobs:
       - name: Build
         run: |
           cd frontend
-          npm run build
+          npm run build -- --configuration ci
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -50,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/dist/browser
+          path: frontend/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
