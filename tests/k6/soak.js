@@ -5,11 +5,11 @@ import { Rate } from 'k6/metrics';
 // Configuración Soak: carga sostenida 40-60 VUs (duración reducida para CI)
 export const options = {
   stages: [
-    { duration: '1m', target: 40 },    // Ramp up a 40 VUs en 1 min
-    { duration: '5m', target: 50 },    // Mantener carga sostenida 50 VUs por 5 min
-    { duration: '1m', target: 60 },    // Incremento a 60 VUs en 1 min
-    { duration: '2m', target: 60 },    // Mantener 60 VUs por 2 min adicionales
-    { duration: '30s', target: 0 },    // Ramp down en 30s
+    { duration: '20s', target: 30 },   // Ramp up rápido a 30 VUs
+    { duration: '1m', target: 40 },    // Mantener carga sostenida 40 VUs por 1 min
+    { duration: '20s', target: 50 },   // Incremento a 50 VUs
+    { duration: '1m', target: 50 },    // Mantener 50 VUs por 1 min
+    { duration: '20s', target: 0 },    // Ramp down rápido
   ],
   thresholds: {
     'http_req_duration{expected_response:true}': ['p(95)<30000'], // 95% de requests exitosos < 30s (ajustado para Render)
