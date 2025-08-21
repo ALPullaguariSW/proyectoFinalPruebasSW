@@ -109,8 +109,12 @@ exports.editarHabitacion = async (req, res) => {
 exports.eliminarHabitacion = async (req, res) => {
   const { id } = req.params;
   try {
-    await db.promise().query('DELETE FROM habitaciones WHERE id = ?', [id]);
-    res.json({ mensaje: 'Habitación eliminada.' });
+    const { rowCount } = await pool.query('DELETE FROM habitaciones WHERE id = $1', [id]);
+    if (rowCount > 0) {
+      res.json({ mensaje: 'Habitación eliminada correctamente.' });
+    } else {
+      res.status(404).json({ mensaje: 'Habitación no encontrada.' });
+    }
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al eliminar la habitación.' });
   }
@@ -122,13 +126,13 @@ exports.disponibilidadHabitaciones = async (req, res) => {
     return res.status(400).json({ mensaje: 'Fechas inválidas.' });
   }
   try {
-    const [habitaciones] = await db.promise().query(
+    const { rows: habitaciones } = await pool.query(
       `SELECT h.id, h.numero, h.tipo, h.descripcion
        FROM habitaciones h
        WHERE h.id NOT IN (
          SELECT habitacion_id FROM reservas
-         WHERE (fecha_inicio < ? AND fecha_fin > ?)
-            OR (fecha_inicio >= ? AND fecha_inicio < ?)
+         WHERE (fecha_inicio < $1 AND fecha_fin > $2)
+            OR (fecha_inicio >= $3 AND fecha_inicio < $4)
        )
        ORDER BY h.numero`,
       [fecha_fin, fecha_inicio, fecha_inicio, fecha_fin]

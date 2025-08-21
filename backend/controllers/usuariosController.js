@@ -122,7 +122,7 @@ exports.reservarHabitacion = async (req, res) => {
         params.push(tipo_habitacion);
       }
       sql += ' ORDER BY h.tipo, h.precio, h.numero';
-      const [habitaciones] = await connection.promise().query(sql, params);
+      const { rows: habitaciones } = await pool.query(sql, params);
       return res.json({ habitaciones });
     } catch (error) {
       return res.status(500).json({ mensaje: 'Error al buscar habitaciones. Intente más tarde.', claseMensaje: 'error' });
@@ -135,16 +135,16 @@ exports.reservarHabitacion = async (req, res) => {
     }
     try {
       // Verificar disponibilidad de la habitación seleccionada
-      const [disp] = await connection.promise().query(
-        'SELECT id FROM reservas WHERE habitacion_id = ? AND NOT (fecha_fin <= ? OR fecha_inicio >= ?)',
+      const { rows: disp } = await pool.query(
+        'SELECT id FROM reservas WHERE habitacion_id = $1 AND NOT (fecha_fin <= $2 OR fecha_inicio >= $3)',
         [habitacion_id, fecha_inicio, fecha_fin]
       );
       if (disp.length > 0) {
         return res.status(400).json({ mensaje: 'La habitación seleccionada ya está reservada para esas fechas.', claseMensaje: 'error' });
       }
       // Insertar reserva
-      await connection.promise().query(
-        'INSERT INTO reservas (usuario_id, habitacion_id, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?)',
+      await pool.query(
+        'INSERT INTO reservas (usuario_id, habitacion_id, fecha_inicio, fecha_fin) VALUES ($1, $2, $3, $4)',
         [usuario_id, habitacion_id, fecha_inicio, fecha_fin]
       );
       return res.json({ mensaje: '¡Reserva registrada con éxito!', claseMensaje: 'success' });
@@ -163,8 +163,8 @@ exports.cancelarReserva = async (req, res) => {
   }
   try {
     // Solo permite cancelar si la reserva pertenece al usuario
-    const [result] = await connection.promise().query('DELETE FROM reservas WHERE id = ? AND usuario_id = ?', [reserva_id, usuario_id]);
-    if (result.affectedRows > 0) {
+          const { rowCount } = await pool.query('DELETE FROM reservas WHERE id = $1 AND usuario_id = $2', [reserva_id, usuario_id]);
+      if (rowCount > 0) {
       return res.json({ mensaje: 'Reserva cancelada exitosamente.', claseMensaje: 'success' });
     } else {
       return res.status(404).json({ mensaje: 'Reserva no encontrada o no pertenece al usuario.', claseMensaje: 'error' });
@@ -180,15 +180,15 @@ exports.misReservas = async (req, res) => {
     return res.status(400).json({ mensaje: 'Falta el ID de usuario.', claseMensaje: 'error' });
   }
   try {
-    const [reservas] = await connection.promise().query(
-      `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.created_at,
-        h.tipo AS habitacion_tipo, h.numero AS habitacion_numero, h.precio AS habitacion_precio
-      FROM reservas r
-      JOIN habitaciones h ON r.habitacion_id = h.id
-      WHERE r.usuario_id = ?
-      ORDER BY r.fecha_inicio DESC`,
-      [usuario_id]
-    );
+          const { rows: reservas } = await pool.query(
+        `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.created_at,
+          h.tipo AS habitacion_tipo, h.numero AS habitacion_numero, h.precio AS habitacion_precio
+        FROM reservas r
+        JOIN habitaciones h ON r.habitacion_id = h.id
+        WHERE r.usuario_id = $1
+        ORDER BY r.fecha_inicio DESC`,
+        [usuario_id]
+      );
     return res.json({ reservas });
   } catch (error) {
     return res.status(500).json({ mensaje: 'Error al obtener las reservas. Intente más tarde.', claseMensaje: 'error' });
@@ -197,7 +197,7 @@ exports.misReservas = async (req, res) => {
 
 exports.obtenerTiposHabitacion = async (req, res) => {
   try {
-    const [tipos] = await connection.promise().query('SELECT DISTINCT tipo FROM habitaciones ORDER BY tipo');
+    const { rows: tipos } = await pool.query('SELECT DISTINCT tipo FROM habitaciones ORDER BY tipo');
     const listaTipos = tipos.map(t => t.tipo);
     res.json(listaTipos);
   } catch (error) {
