@@ -30,8 +30,8 @@ export class RegisterUserComponent {
     this.userService.registrar({
       nombre: this.name,
       correo: this.email,
-      contraseña: this.password,
-      confirm_contraseña: this.confirmPassword
+      contrasena: this.password,
+      confirm_contrasena: this.confirmPassword
     }).subscribe({
       next: (res: any) => {
         this.mensaje = res.mensaje;
