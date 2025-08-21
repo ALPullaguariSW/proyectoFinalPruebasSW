@@ -29,7 +29,7 @@
               "src/styles.css"
             ],
             "outputPath": "dist",
-            "baseHref": "/"
+            "baseHref": "/proyectoFinalPruebasSW/"
           },
           "configurations": {
             "production": {
@@ -46,7 +46,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/"
+              "baseHref": "/proyectoFinalPruebasSW/"
             },
             "ci": {
               "budgets": [
@@ -62,7 +62,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/",
+              "baseHref": "/proyectoFinalPruebasSW/",
               "outputPath": "dist"
             },
             "development": {
