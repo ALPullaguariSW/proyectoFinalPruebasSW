@@ -55,6 +55,19 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+// Endpoint para inicializar la base de datos manualmente
+app.post('/api/init-db', async (req, res) => {
+  try {
+    console.log('🚀 Inicializando base de datos manualmente...');
+    const { initializeDatabase } = require('./scripts/init-db');
+    await initializeDatabase();
+    res.json({ mensaje: 'Base de datos inicializada correctamente' });
+  } catch (error) {
+    console.error('❌ Error al inicializar BD:', error);
+    res.status(500).json({ mensaje: 'Error al inicializar BD', error: error.message });
+  }
+});
+
 app.post('/api/echo-simple', (req, res) => {
   res.status(200).json({ recibido: req.body ?? null });
 });

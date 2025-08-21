@@ -7,7 +7,7 @@ services:
     startCommand: |
       # Forzar inicialización de base de datos
       echo "🚀 Inicializando base de datos..."
-      npm run init-db
+      npm run init-db || (echo "❌ Error en inicialización de BD" && exit 1)
       echo "✅ Base de datos inicializada, iniciando servidor..."
       npm start
     envVars:

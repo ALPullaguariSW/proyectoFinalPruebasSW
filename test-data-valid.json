@@ -1,0 +1,6 @@
+{
+  "nombre": "Test",
+  "correo": "test@test.com",
+  "contrasena": "password123!",
+  "confirm_contrasena": "password123!"
+}
