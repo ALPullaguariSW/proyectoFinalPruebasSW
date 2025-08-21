@@ -222,7 +222,7 @@ exports.obtenerHabitacionesDisponibles = async (req, res) => {
   }
 
   try {
-    const sql = `
+    let sql = `
       SELECT h.id, h.numero, h.estado,
         th.nombre as tipo, th.descripcion, th.precio, th.capacidad,
         NOT EXISTS (
@@ -232,13 +232,18 @@ exports.obtenerHabitacionesDisponibles = async (req, res) => {
         ) AS disponible
       FROM habitaciones h
       JOIN tipos_habitacion th ON h.tipo_id = th.id
-      WHERE ($3 IS NULL OR th.nombre = $3)
-      ORDER BY th.nombre, th.precio, h.numero
     `;
 
-    const params = [fecha_inicio, fecha_fin, tipo_habitacion || null];
-    const { rows: habitaciones } = await pool.query(sql, params);
+    let params = [fecha_inicio, fecha_fin];
+    
+    if (tipo_habitacion && tipo_habitacion !== 'null' && tipo_habitacion !== '[object Object]') {
+      sql += ' WHERE th.nombre = $3';
+      params.push(tipo_habitacion);
+    }
+    
+    sql += ' ORDER BY th.nombre, th.precio, h.numero';
 
+    const { rows: habitaciones } = await pool.query(sql, params);
     return res.json({ habitaciones });
   } catch (error) {
     console.error('Error en obtenerHabitacionesDisponibles:', error);

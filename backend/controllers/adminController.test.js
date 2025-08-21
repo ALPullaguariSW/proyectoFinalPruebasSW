@@ -193,8 +193,23 @@ describe('AdminController', () => {
     it('should create room successfully', async () => {
       mockReq.body = {
         numero: '101',
-        tipo: 'Individual',
-        precio: 100
+        tipo_id: 1,
+        estado: 'disponible'
+      };
+
+      db.query.mockResolvedValueOnce();
+
+      await adminController.crearHabitacion(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Habitación creada correctamente.'
+      });
+    });
+
+    it('should create room with default estado when not provided', async () => {
+      mockReq.body = {
+        numero: '101',
+        tipo_id: 1
       };
 
       db.query.mockResolvedValueOnce();
@@ -213,15 +228,15 @@ describe('AdminController', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'El número, tipo y precio son obligatorios.'
+        mensaje: 'El número y tipo de habitación son obligatorios.'
       });
     });
 
     it('should handle database error in crearHabitacion', async () => {
       mockReq.body = {
         numero: '101',
-        tipo: 'Individual',
-        precio: 100
+        tipo_id: 1,
+        estado: 'disponible'
       };
       db.query.mockRejectedValueOnce(new Error('Database error'));
 
@@ -239,8 +254,24 @@ describe('AdminController', () => {
       mockReq.params = { id: 1 };
       mockReq.body = {
         numero: '101',
-        tipo: 'Individual',
-        precio: 120
+        tipo_id: 1,
+        estado: 'disponible'
+      };
+
+      db.query.mockResolvedValueOnce();
+
+      await adminController.editarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Habitación actualizada correctamente.'
+      });
+    });
+
+    it('should update room with default estado when not provided', async () => {
+      mockReq.params = { id: 1 };
+      mockReq.body = {
+        numero: '101',
+        tipo_id: 1
       };
 
       db.query.mockResolvedValueOnce();
@@ -260,7 +291,7 @@ describe('AdminController', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensaje: 'El número, tipo y precio son obligatorios.'
+        mensaje: 'El número y tipo de habitación son obligatorios.'
       });
     });
 
@@ -268,8 +299,8 @@ describe('AdminController', () => {
       mockReq.params = { id: 1 };
       mockReq.body = {
         numero: '101',
-        tipo: 'Individual',
-        precio: 120
+        tipo_id: 1,
+        estado: 'disponible'
       };
       db.query.mockRejectedValueOnce(new Error('Database error'));
 
@@ -305,6 +336,18 @@ describe('AdminController', () => {
         mensaje: 'Habitación no encontrada.'
       });
     });
+
+    it('should handle database error in eliminarHabitacion', async () => {
+      mockReq.params = { id: 1 };
+      db.query.mockRejectedValueOnce(new Error('Database error'));
+
+      await adminController.eliminarHabitacion(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        mensaje: 'Error al eliminar la habitación.'
+      });
+    });
   });
 
   describe('disponibilidadHabitaciones', () => {
@@ -315,7 +358,16 @@ describe('AdminController', () => {
       };
 
       const mockHabitaciones = [
-        { id: 1, numero: '101', tipo: 'Individual' }
+        { 
+          id: 1, 
+          numero: '101', 
+          estado: 'disponible',
+          created_at: '2024-01-01',
+          tipo: 'Individual',
+          descripcion: 'Habitación individual',
+          precio: 100,
+          capacidad: 1
+        }
       ];
 
       db.query.mockResolvedValueOnce({ rows: mockHabitaciones });

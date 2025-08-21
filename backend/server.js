@@ -7,7 +7,12 @@ const cors = require('cors');
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: ['https://alpullaguarisw.github.io', 'http://localhost:4200'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Middleware de logging para debugging
@@ -31,6 +36,141 @@ app.use('/api/admin', adminRoutes);
 // Importar ruta de health check
 const healthRoutes = require('./routes/health');
 app.use('/api', healthRoutes);
+
+// Endpoint de registro directo para el frontend
+app.post('/api/registro', async (req, res) => {
+  const { nombre, correo, contrasena, confirm_contrasena } = req.body;
+
+  // Validaciones
+  if (!nombre || !correo || !contrasena || !confirm_contrasena) {
+    return res.status(400).json({ 
+      mensaje: 'Todos los campos son requeridos.', 
+      claseMensaje: 'error' 
+    });
+  }
+
+  if (contrasena !== confirm_contrasena) {
+    return res.status(400).json({ 
+      mensaje: 'Las contraseñas no coinciden.', 
+      claseMensaje: 'error' 
+    });
+  }
+
+  if (contrasena.length < 5) {
+    return res.status(400).json({ 
+      mensaje: 'La contraseña debe tener al menos 5 caracteres.', 
+      claseMensaje: 'error' 
+    });
+  }
+
+  try {
+    // Verificar si el correo ya existe
+    const { rows: existingUser } = await pool.query(
+      'SELECT id FROM usuarios WHERE correo = $1',
+      [correo]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({ 
+        mensaje: 'El correo ya está registrado.', 
+        claseMensaje: 'error' 
+      });
+    }
+
+    // Hash de la contraseña
+    const bcrypt = require('bcrypt');
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
+
+    // Insertar usuario
+    const { rows: newUser } = await pool.query(
+      'INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES ($1, $2, $3, $4) RETURNING id, nombre, correo, rol',
+      [nombre, correo, hashedPassword, 'usuario']
+    );
+
+    res.status(201).json({ 
+      mensaje: 'Usuario registrado exitosamente.', 
+      claseMensaje: 'success',
+      usuario: newUser[0]
+    });
+  } catch (error) {
+    console.error('Error en registro:', error);
+    res.status(500).json({ 
+      mensaje: 'Error interno del servidor.', 
+      claseMensaje: 'error' 
+    });
+  }
+});
+
+// Endpoint de login directo para el frontend
+app.post('/api/login', async (req, res) => {
+  const { correo, contrasena } = req.body;
+
+  if (!correo || !contrasena) {
+    return res.status(400).json({ 
+      mensaje: 'Correo y contraseña son requeridos.', 
+      claseMensaje: 'error' 
+    });
+  }
+
+  try {
+    // Buscar usuario
+    const { rows: usuarios } = await pool.query(
+      'SELECT id, nombre, correo, contrasena, rol FROM usuarios WHERE correo = $1',
+      [correo]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(401).json({ 
+        mensaje: 'Credenciales inválidas.', 
+        claseMensaje: 'error' 
+      });
+    }
+
+    const usuario = usuarios[0];
+
+    // Verificar contraseña
+    const bcrypt = require('bcrypt');
+    const passwordMatch = await bcrypt.compare(contrasena, usuario.contrasena);
+
+    if (!passwordMatch) {
+      return res.status(401).json({ 
+        mensaje: 'Credenciales inválidas.', 
+        claseMensaje: 'error' 
+      });
+    }
+
+    // Generar JWT
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { 
+        id: usuario.id, 
+        nombre: usuario.nombre, 
+        rol: usuario.rol 
+      },
+      process.env.JWT_SECRET || 'tu_secreto_jwt_aqui',
+      { expiresIn: '2h' }
+    );
+
+    res.json({ 
+      mensaje: 'Login exitoso.', 
+      claseMensaje: 'success',
+      token,
+      usuario: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        rol: usuario.rol
+      }
+    });
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ 
+      mensaje: 'Error interno del servidor.', 
+      claseMensaje: 'error' 
+    });
+  }
+});
 
 // RUTAS DIRECTAS PARA COINCIDIR CON EL FRONTEND
 // Obtener tipos de habitación (pública)
@@ -56,7 +196,7 @@ app.get('/api/habitaciones-disponibles', async (req, res) => {
   }
 
   try {
-    const sql = `
+    let sql = `
       SELECT h.id, h.numero, h.estado,
         th.nombre as tipo, th.descripcion, th.precio, th.capacidad,
         NOT EXISTS (
@@ -66,13 +206,18 @@ app.get('/api/habitaciones-disponibles', async (req, res) => {
         ) AS disponible
       FROM habitaciones h
       JOIN tipos_habitacion th ON h.tipo_id = th.id
-      WHERE ($3 IS NULL OR th.nombre = $3)
-      ORDER BY th.nombre, th.precio, h.numero
     `;
 
-    const params = [fecha_inicio, fecha_fin, tipo_habitacion || null];
-    const { rows: habitaciones } = await pool.query(sql, params);
+    let params = [fecha_inicio, fecha_fin];
+    
+    if (tipo_habitacion && tipo_habitacion !== 'null' && tipo_habitacion !== '[object Object]') {
+      sql += ' WHERE th.nombre = $3';
+      params.push(tipo_habitacion);
+    }
+    
+    sql += ' ORDER BY th.nombre, th.precio, h.numero';
 
+    const { rows: habitaciones } = await pool.query(sql, params);
     return res.json({ habitaciones });
   } catch (error) {
     console.error('Error en obtenerHabitacionesDisponibles:', error);
@@ -206,6 +351,27 @@ app.get('/api/test-db', async (req, res) => {
   } catch (error) {
     console.error('Error de conexión a BD:', error);
     res.status(500).json({ mensaje: 'Error de conexión a BD', error: error.message });
+  }
+});
+
+// Endpoint de prueba para admin (sin autenticación para testing)
+app.get('/api/admin/test', async (req, res) => {
+  try {
+    const { rows: usuarios } = await pool.query('SELECT COUNT(*) AS total FROM usuarios');
+    const { rows: reservas } = await pool.query('SELECT COUNT(*) AS total FROM reservas');
+    const { rows: habitaciones } = await pool.query('SELECT COUNT(*) AS total FROM habitaciones');
+    
+    res.json({ 
+      mensaje: 'Admin endpoint funcionando',
+      stats: {
+        usuarios: usuarios[0].total,
+        reservas: reservas[0].total,
+        habitaciones: habitaciones[0].total
+      }
+    });
+  } catch (error) {
+    console.error('Error en admin test:', error);
+    res.status(500).json({ mensaje: 'Error en admin test', error: error.message });
   }
 });
 

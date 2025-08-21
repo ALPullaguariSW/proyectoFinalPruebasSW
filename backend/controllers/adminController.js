@@ -17,10 +17,12 @@ exports.getStats = async (req, res) => {
 exports.getProximasReservas = async (req, res) => {
   try {
     const { rows: reservas } = await pool.query(
-      `SELECT r.id, r.fecha_inicio, r.fecha_fin, u.nombre AS usuario, h.numero AS habitacion
+      `SELECT r.id, r.fecha_inicio, r.fecha_fin, u.nombre AS usuario, h.numero AS habitacion,
+        th.nombre AS tipo_habitacion, th.precio AS precio_habitacion
        FROM reservas r
        JOIN usuarios u ON r.usuario_id = u.id
        JOIN habitaciones h ON r.habitacion_id = h.id
+       JOIN tipos_habitacion th ON h.tipo_id = th.id
        WHERE r.fecha_inicio >= CURRENT_DATE
        ORDER BY r.fecha_inicio ASC
        LIMIT 5`
@@ -35,10 +37,11 @@ exports.listarReservas = async (req, res) => {
   try {
     const { rows: reservas } = await pool.query(
       `SELECT r.id, r.fecha_inicio, r.fecha_fin, r.created_at, u.nombre AS usuario, u.correo,
-        h.tipo AS habitacion_tipo, h.numero AS habitacion_numero
+        th.nombre AS habitacion_tipo, h.numero AS habitacion_numero, th.precio AS habitacion_precio
        FROM reservas r
        JOIN usuarios u ON r.usuario_id = u.id
        JOIN habitaciones h ON r.habitacion_id = h.id
+       JOIN tipos_habitacion th ON h.tipo_id = th.id
        ORDER BY r.fecha_inicio DESC`
     );
     res.json({ reservas });
@@ -66,7 +69,13 @@ exports.cancelarReservaAdmin = async (req, res) => {
 
 exports.listarHabitaciones = async (req, res) => {
   try {
-    const { rows: habitaciones } = await pool.query('SELECT * FROM habitaciones ORDER BY numero');
+    const { rows: habitaciones } = await pool.query(
+      `SELECT h.id, h.numero, h.estado, h.created_at,
+        th.nombre AS tipo, th.descripcion, th.precio, th.capacidad
+       FROM habitaciones h
+       JOIN tipos_habitacion th ON h.tipo_id = th.id
+       ORDER BY h.numero`
+    );
     res.json({ habitaciones });
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al listar habitaciones.' });
@@ -74,14 +83,14 @@ exports.listarHabitaciones = async (req, res) => {
 };
 
 exports.crearHabitacion = async (req, res) => {
-  const { numero, tipo, descripcion, servicios, imagen, precio } = req.body;
-  if (!numero || !tipo || !precio) {
-    return res.status(400).json({ mensaje: 'El número, tipo y precio son obligatorios.' });
+  const { numero, tipo_id, estado } = req.body;
+  if (!numero || !tipo_id) {
+    return res.status(400).json({ mensaje: 'El número y tipo de habitación son obligatorios.' });
   }
   try {
     await pool.query(
-      'INSERT INTO habitaciones (numero, tipo, descripcion, servicios, imagen, precio) VALUES ($1, $2, $3, $4, $5, $6)',
-      [numero, tipo, descripcion, servicios, imagen, precio]
+      'INSERT INTO habitaciones (numero, tipo_id, estado) VALUES ($1, $2, $3)',
+      [numero, tipo_id, estado || 'disponible']
     );
     res.json({ mensaje: 'Habitación creada correctamente.' });
   } catch (error) {
@@ -91,14 +100,14 @@ exports.crearHabitacion = async (req, res) => {
 
 exports.editarHabitacion = async (req, res) => {
   const { id } = req.params;
-  const { numero, tipo, descripcion, servicios, imagen, precio } = req.body;
-  if (!numero || !tipo || !precio) {
-    return res.status(400).json({ mensaje: 'El número, tipo y precio son obligatorios.' });
+  const { numero, tipo_id, estado } = req.body;
+  if (!numero || !tipo_id) {
+    return res.status(400).json({ mensaje: 'El número y tipo de habitación son obligatorios.' });
   }
   try {
     await pool.query(
-      'UPDATE habitaciones SET numero=$1, tipo=$2, descripcion=$3, servicios=$4, imagen=$5, precio=$6 WHERE id=$7',
-      [numero, tipo, descripcion, servicios, imagen, precio, id]
+      'UPDATE habitaciones SET numero=$1, tipo_id=$2, estado=$3 WHERE id=$4',
+      [numero, tipo_id, estado || 'disponible', id]
     );
     res.json({ mensaje: 'Habitación actualizada correctamente.' });
   } catch (error) {
@@ -127,8 +136,10 @@ exports.disponibilidadHabitaciones = async (req, res) => {
   }
   try {
     const { rows: habitaciones } = await pool.query(
-      `SELECT h.id, h.numero, h.tipo, h.descripcion
+      `SELECT h.id, h.numero, h.estado, h.created_at,
+        th.nombre AS tipo, th.descripcion, th.precio, th.capacidad
        FROM habitaciones h
+       JOIN tipos_habitacion th ON h.tipo_id = th.id
        WHERE h.id NOT IN (
          SELECT habitacion_id FROM reservas
          WHERE (fecha_inicio < $1 AND fecha_fin > $2)

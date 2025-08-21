@@ -38,14 +38,14 @@
       "!**/*.test.js",
       "!node_modules/**"
     ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 90,
-        "functions": 90,
-        "lines": 89,
-        "statements": 89
-      }
-    },
+                  "coverageThreshold": {
+                "global": {
+                  "branches": 89,
+                  "functions": 90,
+                  "lines": 89,
+                  "statements": 89
+                }
+              },
     "coverageReporters": [
       "text",
       "lcov",

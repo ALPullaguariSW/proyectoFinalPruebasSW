@@ -32,7 +32,27 @@ jobs:
       
     - name: Ejecutar tests unitarios del backend
       working-directory: ./backend
-      run: npm test
+      run: npm test -- --coverage --watchAll=false --ci
+      
+    - name: Verificar cobertura del backend (debe ser ≥ 90%)
+      working-directory: ./backend
+      run: |
+        if [ ! -f "coverage/lcov-report/index.html" ]; then
+          echo "❌ No se generó reporte de cobertura"
+          exit 1
+        fi
+        
+        # Extraer porcentaje de cobertura de líneas
+        COVERAGE=$(grep -o 'class="strong">[0-9]*\.[0-9]*%' coverage/lcov-report/index.html | head -1 | grep -o '[0-9]*\.[0-9]*')
+        echo "📊 Cobertura del backend: ${COVERAGE}%"
+        
+        # Verificar que sea ≥ 90%
+        if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+          echo "❌ La cobertura del backend (${COVERAGE}%) es menor al 90% requerido"
+          exit 1
+        fi
+        
+        echo "✅ Cobertura del backend (${COVERAGE}%) cumple con el requisito ≥ 90%"
       
     - name: Subir reporte de cobertura a Codecov
       uses: codecov/codecov-action@v3
@@ -70,6 +90,26 @@ jobs:
     - name: Ejecutar tests unitarios del frontend
       working-directory: ./frontend
       run: npm run test:ci
+      
+    - name: Verificar cobertura del frontend (debe ser ≥ 90%)
+      working-directory: ./frontend
+      run: |
+        if [ ! -f "coverage/lcov-report/index.html" ]; then
+          echo "❌ No se generó reporte de cobertura"
+          exit 1
+        fi
+        
+        # Extraer porcentaje de cobertura de líneas
+        COVERAGE=$(grep -o 'class="strong">[0-9]*\.[0-9]*%' coverage/lcov-report/index.html | head -1 | grep -o '[0-9]*\.[0-9]*')
+        echo "📊 Cobertura del frontend: ${COVERAGE}%"
+        
+        # Verificar que sea ≥ 90%
+        if (( $(echo "$COVERAGE < 90" | bc -l) )); then
+          echo "❌ La cobertura del frontend (${COVERAGE}%) es menor al 90% requerido"
+          exit 1
+        fi
+        
+        echo "✅ Cobertura del frontend (${COVERAGE}%) cumple con el requisito ≥ 90%"
       
     - name: Publicar artefactos de cobertura del frontend
       uses: actions/upload-artifact@v4
@@ -118,15 +158,18 @@ jobs:
         
     - name: Ejecutar test de Ramp/Load
       run: |
-        k6 run tests/k6/ramp-load.js --out json=results-ramp.json || echo "Test Ramp/Load completado con warnings"
+        echo "🚀 Ejecutando prueba de Ramp/Load..."
+        k6 run tests/k6/ramp-load.js --out json=results-ramp.json
         
     - name: Ejecutar test de Spike
       run: |
-        k6 run tests/k6/spike.js --out json=results-spike.json || echo "Test Spike completado con warnings"
+        echo "⚡ Ejecutando prueba de Spike..."
+        k6 run tests/k6/spike.js --out json=results-spike.json
         
     - name: Ejecutar test de Soak
       run: |
-        k6 run tests/k6/soak.js --out json=results-soak.json || echo "Test Soak completado con warnings"
+        echo "🏃‍♂️ Ejecutando prueba de Soak (endurance)..."
+        k6 run tests/k6/soak.js --out json=results-soak.json
       
     - name: Publicar resultados de performance
       uses: actions/upload-artifact@v4

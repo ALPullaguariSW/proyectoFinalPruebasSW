@@ -9,6 +9,28 @@
     "test": "ng test --code-coverage",
     "test:ci": "ng test --code-coverage --watch=false --browsers=ChromeHeadless"
   },
+  "karma": {
+    "coverageReporter": {
+      "dir": "coverage",
+      "subdir": ".",
+      "reporters": [
+        { "type": "html" },
+        { "type": "text-summary" },
+        { "type": "lcov" }
+      ]
+    },
+    "coverageIstanbulReporter": {
+      "dir": "coverage",
+      "reports": ["html", "lcov", "text-summary"],
+      "fixWebpackSourcePaths": true,
+      "thresholds": {
+        "statements": 90,
+        "lines": 90,
+        "branches": 90,
+        "functions": 90
+      }
+    }
+  },
   "prettier": {
     "overrides": [
       {
